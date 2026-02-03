@@ -34,6 +34,14 @@
             animation-timing-function: linear;
             animation-iteration-count: infinite;
         }
+        
+        @keyframes sway {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+        .animate-sway {
+            animation: sway 2s ease-in-out infinite;
+        }
 
         /* Prevent scrolling on mobile when trying to catch the button */
         body {
@@ -65,8 +73,8 @@
         );
 
         // Custom Cat Icon Component
-        const CatIcon = ({ mood = 'neutral' }) => (
-            <svg viewBox="0 0 200 200" className="w-32 h-32 mx-auto drop-shadow-md transition-transform duration-300 hover:scale-105">
+        const CatIcon = ({ mood = 'neutral', holding = null }) => (
+            <svg viewBox="0 0 200 200" className="w-48 h-48 mx-auto drop-shadow-md transition-transform duration-300">
                 {/* Ears */}
                 <path d="M40 60 L60 10 L90 50 Z" fill="#D4A373" stroke="#AC8257" strokeWidth="2" strokeLinejoin="round" />
                 <path d="M160 60 L140 10 L110 50 Z" fill="#D4A373" stroke="#AC8257" strokeWidth="2" strokeLinejoin="round" />
@@ -75,7 +83,7 @@
                 <ellipse cx="100" cy="110" rx="70" ry="60" fill="#E9C496" stroke="#D4A373" strokeWidth="2" />
                 
                 {/* Eyes */}
-                {mood === 'happy' ? (
+                {mood === 'happy' || mood === 'excited' ? (
                     <>
                         <path d="M70 100 Q80 90 90 100" fill="none" stroke="#4A3B2A" strokeWidth="4" strokeLinecap="round" />
                         <path d="M110 100 Q120 90 130 100" fill="none" stroke="#4A3B2A" strokeWidth="4" strokeLinecap="round" />
@@ -96,10 +104,49 @@
                 <path d="M140 115 L170 110" stroke="#CD9777" strokeWidth="2" opacity="0.6" />
                 <path d="M140 122 L170 125" stroke="#CD9777" strokeWidth="2" opacity="0.6" />
 
-                {/* Floating Heart */}
-                <g className="animate-bounce">
-                    <path d="M150 40 Q165 25 180 40 T200 60 Q180 90 150 110" fill="#FF4D6D" transform="scale(0.6) translate(80, -40)" />
-                </g>
+                {/* Hands/Paws (Visible when holding something) */}
+                {holding && (
+                    <>
+                        <circle cx="70" cy="150" r="12" fill="#D4A373" stroke="#AC8257" strokeWidth="2" />
+                        <circle cx="130" cy="150" r="12" fill="#D4A373" stroke="#AC8257" strokeWidth="2" />
+                    </>
+                )}
+
+                {/* Items being held */}
+                {holding === 'rose' && (
+                    <g transform="translate(100, 140)">
+                         <g className="animate-sway origin-bottom">
+                            {/* Stem - Curved to look organic */}
+                            <path d="M0 0 Q2 -20 0 -40" stroke="#166534" strokeWidth="3" fill="none" />
+                            
+                            {/* Leaves - Distinct leaf shapes */}
+                            <path d="M0 -20 C5 -22 12 -20 15 -15 C12 -12 5 -15 0 -18" fill="#15803d" />
+                            <path d="M0 -25 C-5 -27 -12 -25 -15 -20 C-12 -17 -5 -20 0 -23" fill="#15803d" />
+                            
+                            {/* Rose Head - Layered Petals (Not a circle) */}
+                            <path d="M-8 -38 C-8 -30 8 -30 8 -38 L0 -40 Z" fill="#9F1239" /> 
+                            <path d="M-10 -40 C-12 -55 12 -55 10 -40 C5 -35 -5 -35 -10 -40" fill="#E11D48" />
+                            <path d="M-6 -45 C-6 -50 6 -50 6 -45 C3 -42 -3 -42 -6 -45" fill="#FB7185" />
+                        </g>
+                    </g>
+                )}
+
+                {holding === 'chocolate' && (
+                    <g transform="translate(70, 120)">
+                        <rect x="0" y="0" width="60" height="40" rx="4" fill="#5D4037" stroke="#3E2723" strokeWidth="2" />
+                        <rect x="5" y="5" width="22" height="12" rx="1" fill="#795548" />
+                        <rect x="33" y="5" width="22" height="12" rx="1" fill="#795548" />
+                        <rect x="5" y="23" width="22" height="12" rx="1" fill="#795548" />
+                        <rect x="33" y="23" width="22" height="12" rx="1" fill="#795548" />
+                    </g>
+                )}
+
+                {/* Floating Heart if not holding anything specific */}
+                {!holding && (
+                    <g className="animate-bounce">
+                        <path d="M150 40 Q165 25 180 40 T200 60 Q180 90 150 110" fill="#FF4D6D" transform="scale(0.6) translate(80, -40)" />
+                    </g>
+                )}
             </svg>
         );
 
@@ -107,16 +154,24 @@
             const [accepted, setAccepted] = useState(false);
             const [noPosition, setNoPosition] = useState({ x: 0, y: 0 });
             const [hasMoved, setHasMoved] = useState(false);
+            const [interaction, setInteraction] = useState(null); // 'chocolate', 'rose', 'kiss'
             const noBtnRef = useRef(null);
             const containerRef = useRef(null);
+
+            // Handle interaction timeout
+            useEffect(() => {
+                if (interaction) {
+                    const timer = setTimeout(() => {
+                        setInteraction(null);
+                    }, 3000); // Disappear after 3 seconds
+                    return () => clearTimeout(timer);
+                }
+            }, [interaction]);
 
             const handleNoInteraction = (e) => {
                 if (accepted) return;
                 
-                // For mobile touches, we don't want to trigger click on the button
-                // We just want it to move
                 if (e.type === 'touchstart') {
-                   // Optional: prevent scrolling if desired, but can be annoying
                    // e.preventDefault();
                 }
 
@@ -125,12 +180,10 @@
                 const containerRect = containerRef.current.getBoundingClientRect();
                 const btnRect = noBtnRef.current.getBoundingClientRect();
 
-                // Calculate safe area (keep inside container but move away)
                 const padding = 20;
                 const maxX = containerRect.width - btnRect.width - padding;
                 const maxY = containerRect.height - btnRect.height - padding;
 
-                // Generate new random position
                 const randomX = Math.max(0, Math.random() * maxX);
                 const randomY = Math.max(0, Math.random() * maxY);
 
@@ -146,11 +199,44 @@
                 setAccepted(false);
                 setHasMoved(false);
                 setNoPosition({ x: 0, y: 0 });
+                setInteraction(null);
             };
 
             return (
                 <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative selection:bg-rose-200">
                     
+                    {/* Interaction Modal Overlay */}
+                    {interaction && (
+                        <div 
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
+                            onClick={() => setInteraction(null)}
+                        >
+                            <div className="bg-white rounded-3xl p-8 shadow-2xl animate-in zoom-in duration-300 transform scale-110 flex flex-col items-center max-w-sm mx-4">
+                                {interaction === 'kiss' && (
+                                    <>
+                                        <span className="text-9xl animate-bounce drop-shadow-lg mb-4">😘</span>
+                                        <p className="text-xl font-bold text-rose-500">Mwaaaaaah!</p>
+                                        <p className="text-lg text-gray-500 mt-2 font-medium italic">"Ok, take thish one. take take"</p>
+                                    </>
+                                )}
+                                {interaction === 'rose' && (
+                                    <>
+                                        <CatIcon mood="happy" holding="rose" />
+                                        <p className="mt-4 text-xl font-bold text-rose-500">For you! 🌹</p>
+                                        <p className="text-lg text-gray-500 mt-2 font-medium italic">"Ok, take thish one. take take"</p>
+                                    </>
+                                )}
+                                {interaction === 'chocolate' && (
+                                    <>
+                                        <CatIcon mood="excited" holding="chocolate" />
+                                        <p className="mt-4 text-xl font-bold text-amber-700">Sweet treat! 🍫</p>
+                                        <p className="text-lg text-gray-500 mt-2 font-medium italic">"Ok, take thish one. take take"</p>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Decorative Background Elements */}
                     <div className="absolute top-10 left-10 text-rose-200 animate-pulse">
                         <HeartIcon size={48} />
@@ -232,14 +318,31 @@
                                 </h1>
                                 
                                 <p className="text-lg text-gray-600 mb-8">
-                                    I knew you'd say yes! ❤️<br />
-                                    Guddan jaban shahi, aage peeche maar khayi! 
+                                    I knew you'd say yes, Arpita! ❤️
                                 </p>
 
-                                <div className="flex justify-center gap-2">
-                                    <span className="animate-bounce delay-100 text-4xl">🥰</span>
-                                    <span className="animate-bounce delay-200 text-4xl">🌹</span>
-                                    <span className="animate-bounce delay-300 text-4xl">🍫</span>
+                                <div className="flex justify-center gap-4">
+                                    <button 
+                                        onClick={() => setInteraction('kiss')} 
+                                        className="text-4xl hover:scale-125 transition-transform duration-200 cursor-pointer animate-bounce delay-100"
+                                        title="Send a kiss"
+                                    >
+                                        🥰
+                                    </button>
+                                    <button 
+                                        onClick={() => setInteraction('rose')} 
+                                        className="text-4xl hover:scale-125 transition-transform duration-200 cursor-pointer animate-bounce delay-200"
+                                        title="Get a rose"
+                                    >
+                                        🌹
+                                    </button>
+                                    <button 
+                                        onClick={() => setInteraction('chocolate')} 
+                                        className="text-4xl hover:scale-125 transition-transform duration-200 cursor-pointer animate-bounce delay-300"
+                                        title="Get chocolate"
+                                    >
+                                        🍫
+                                    </button>
                                 </div>
                                 
                                 {/* Confetti Particles */}
