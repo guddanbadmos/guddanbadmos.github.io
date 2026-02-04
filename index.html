@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS Prep Master - KV/CBSE/Govt Exams</title>
+    <title>General Computer Literacy - Math Teachers Prep</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,7 +21,7 @@
     <style>
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f0fdf4; /* Light green tint */
+            background-color: #f0f9ff; /* Light blue tint for Math vibe */
         }
         
         h1, h2, h3, button {
@@ -54,11 +54,11 @@
             border-radius: 4px;
         }
         .custom-scroll::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
+            background: #94a3b8; 
             border-radius: 4px;
         }
         .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
+            background: #64748b; 
         }
 
         /* Animations */
@@ -69,193 +69,308 @@
         .animate-float {
             animation: float 3s ease-in-out infinite;
         }
+
+        @keyframes dance {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+            25% { transform: translateY(-15px) rotate(-10deg) scale(1.1); }
+            50% { transform: translateY(0) rotate(0deg) scale(1); }
+            75% { transform: translateY(-15px) rotate(10deg) scale(1.1); }
+        }
+        .animate-dance {
+            animation: dance 0.6s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .animate-heartbeat {
+            animation: heartbeat 1s ease-in-out infinite;
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect, useMemo, useRef } = React;
 
-        // --- MOCK DATABASE (Updated for KVS/DSSSB/CBSE Syllabus) ---
-        // Questions reflect the 'Previous Year Question' style of KVS PGT CS & DSSSB.
-        const QUESTION_DATABASE = [
-            // --- TOPIC: PYTHON (Outputs & Concepts) - High Weightage in KVS ---
+        // ==========================================
+        //       HUGE DATABASE GENERATOR LOGIC
+        // ==========================================
+
+        // 1. DATA SOURCES FOR GENERATION
+        const SHORTCUTS_DB = [
+            { key: "Ctrl + C", action: "Copy selected item" },
+            { key: "Ctrl + V", action: "Paste from clipboard" },
+            { key: "Ctrl + X", action: "Cut selected item" },
+            { key: "Ctrl + Z", action: "Undo last action" },
+            { key: "Ctrl + Y", action: "Redo last action" },
+            { key: "Ctrl + A", action: "Select All" },
+            { key: "Ctrl + B", action: "Bold formatting" },
+            { key: "Ctrl + I", action: "Italic formatting" },
+            { key: "Ctrl + U", action: "Underline formatting" },
+            { key: "Ctrl + S", action: "Save document" },
+            { key: "Ctrl + P", action: "Print document" },
+            { key: "Ctrl + F", action: "Find text" },
+            { key: "Ctrl + H", action: "Find and Replace" },
+            { key: "Ctrl + K", action: "Insert Hyperlink" },
+            { key: "Alt + Tab", action: "Switch between open apps" },
+            { key: "F5", action: "Refresh page or Start Slideshow" },
+            { key: "Alt + F4", action: "Close active window" },
+            { key: "Ctrl + Home", action: "Go to beginning of doc" },
+            { key: "Ctrl + End", action: "Go to end of doc" }
+        ];
+
+        const FULL_FORMS_DB = [
+            { short: "CPU", long: "Central Processing Unit" },
+            { short: "RAM", long: "Random Access Memory" },
+            { short: "ROM", long: "Read Only Memory" },
+            { short: "URL", long: "Uniform Resource Locator" },
+            { short: "USB", long: "Universal Serial Bus" },
+            { short: "HTTP", long: "HyperText Transfer Protocol" },
+            { short: "HTML", long: "HyperText Markup Language" },
+            { short: "PDF", long: "Portable Document Format" },
+            { short: "Wi-Fi", long: "Wireless Fidelity" },
+            { short: "LAN", long: "Local Area Network" },
+            { short: "WAN", long: "Wide Area Network" },
+            { short: "GUI", long: "Graphical User Interface" },
+            { short: "OS", long: "Operating System" },
+            { short: "BIOS", long: "Basic Input Output System" },
+            { short: "JPEG", long: "Joint Photographic Experts Group" },
+            { short: "PNG", long: "Portable Network Graphics" },
+            { short: "VIRUS", long: "Vital Information Resources Under Siege" },
+            { short: "ALU", long: "Arithmetic Logic Unit" },
+            { short: "CU", long: "Control Unit" }
+        ];
+
+        const EXTENSIONS_DB = [
+            { ext: ".docx", type: "MS Word Document" },
+            { ext: ".xlsx", type: "MS Excel Spreadsheet" },
+            { ext: ".pptx", type: "MS PowerPoint Presentation" },
+            { ext: ".pdf", type: "Portable Document Format" },
+            { ext: ".jpg", type: "Image File" },
+            { ext: ".mp3", type: "Audio File" },
+            { ext: ".mp4", type: "Video File" },
+            { ext: ".html", type: "Web Page" },
+            { ext: ".exe", type: "Executable Program" },
+            { ext: ".zip", type: "Compressed File" }
+        ];
+
+        const UNITS_DB = [
+            { unit: "1 Bit", val: "Binary Digit (0 or 1)" },
+            { unit: "1 Nibble", val: "4 Bits" },
+            { unit: "1 Byte", val: "8 Bits" },
+            { unit: "1 KB (Kilobyte)", val: "1024 Bytes" },
+            { unit: "1 MB (Megabyte)", val: "1024 KB" },
+            { unit: "1 GB (Gigabyte)", val: "1024 MB" },
+            { unit: "1 TB (Terabyte)", val: "1024 GB" }
+        ];
+
+        // 2. STATIC CONCEPTUAL QUESTIONS (Hand-picked for Teaching Exams)
+        const STATIC_QUESTIONS = [
             {
-                id: 1,
-                category: "Python Output",
-                question: "What will be the output of: print('Hello'[-1::-1])?",
-                options: ["Hello", "olleH", "Error", "o"],
-                correctAnswer: 1,
-                explanation: "Slicing syntax is [start:stop:step]. 'Hello'[-1] is 'o'. The step is -1, which reverses the string. So it prints the string in reverse: 'olleH'. This is a common pattern in CBSE/KVS exams."
+                category: "Hardware",
+                question: "Which of the following is an Input Device?",
+                options: ["Monitor", "Printer", "Scanner", "Speaker"],
+                correctAnswer: 2,
+                explanation: "A Scanner captures images from physical documents and converts them into digital format (Input). Monitors, Printers, and Speakers are Output devices."
             },
             {
-                id: 2,
-                category: "Python Lists",
-                question: "L = [1, 2, 3]. What is the result of L * 2?",
-                options: ["[2, 4, 6]", "[1, 2, 3, 1, 2, 3]", "Error", "[1, 2, 3, 2]"],
-                correctAnswer: 1,
-                explanation: "In Python, the '*' operator on a list performs replication, not element-wise multiplication. It repeats the list elements. [1, 2, 3] * 2 becomes [1, 2, 3, 1, 2, 3]."
+                category: "Hardware",
+                question: "The 'brain' of the computer is known as:",
+                options: ["RAM", "Hard Disk", "CPU", "Motherboard"],
+                correctAnswer: 2,
+                explanation: "The CPU (Central Processing Unit) performs all the processing and calculations, acting as the brain of the computer."
             },
             {
-                id: 3,
-                category: "Python Tuples",
-                question: "Which of the following creates a tuple with a single element?",
-                options: ["t = (5)", "t = 5,", "t = (5,)", "Both B and C"],
+                category: "Memory",
+                question: "Which memory is volatile (data is lost when power is off)?",
+                options: ["ROM", "Hard Disk", "RAM", "Flash Drive"],
+                correctAnswer: 2,
+                explanation: "RAM (Random Access Memory) is volatile memory. It holds data only while the computer is on. ROM and Hard Disks are non-volatile."
+            },
+            {
+                category: "Software",
+                question: "Which of the following is System Software?",
+                options: ["MS Word", "Operating System (Windows)", "Photoshop", "Chrome"],
+                correctAnswer: 1,
+                explanation: "An Operating System (like Windows, Linux, macOS) is System Software that manages hardware. The others are Application Software used for specific tasks."
+            },
+            {
+                category: "MS Word",
+                question: "What is the default file extension for MS Word 2010 and later?",
+                options: [".doc", ".word", ".txt", ".docx"],
                 correctAnswer: 3,
-                explanation: "To create a single-element tuple, a trailing comma is mandatory. 't=(5)' is just an integer in parentheses. Both 't=5,' and 't=(5,)' create a tuple of length 1."
+                explanation: ".docx is the default XML-based file format for Word 2007 and later. Older versions used .doc."
             },
             {
-                id: 4,
-                category: "Python Functions",
-                question: "What is the default return value of a function in Python that does not return anything explicitly?",
-                options: ["0", "True", "None", "Null"],
-                correctAnswer: 2,
-                explanation: "If a Python function reaches the end of execution without hitting a 'return' statement, it implicitly returns the special object 'None'. Note: Python uses 'None', not 'Null'."
+                category: "MS Word",
+                question: "Which feature is used to send the same letter to multiple people?",
+                options: ["Macro", "Mail Merge", "Template", "Autocorrect"],
+                correctAnswer: 1,
+                explanation: "Mail Merge is a tool in MS Word that allows you to create a batch of documents that are personalized for each recipient."
             },
-             {
-                id: 5,
-                category: "Python Identifiers",
-                question: "Which of the following is NOT a keyword in Python?",
-                options: ["eval", "assert", "nonlocal", "pass"],
+            {
+                category: "MS Excel",
+                question: "In Excel, every formula must start with which sign?",
+                options: ["#", "@", "=", "$"],
+                correctAnswer: 2,
+                explanation: "All formulas in MS Excel must begin with an equal sign (=). For example: =SUM(A1:A10)."
+            },
+            {
+                category: "MS Excel",
+                question: "The intersection of a row and a column in Excel is called a:",
+                options: ["Grid", "Box", "Cell", "Table"],
+                correctAnswer: 2,
+                explanation: "A Cell is the basic unit of a worksheet where data is entered, formed by the intersection of a row and a column (e.g., A1)."
+            },
+            {
+                category: "Internet",
+                question: "Unsolicited junk email is commonly known as:",
+                options: ["Spam", "Draft", "Trash", "Archive"],
                 correctAnswer: 0,
-                explanation: "'eval' is a built-in function in Python, not a keyword. 'assert', 'nonlocal', and 'pass' are reserved keywords. Keywords cannot be used as identifiers."
-            },
-            // --- TOPIC: COMPUTER NETWORKS (Protocols & Topologies) ---
-            {
-                id: 6,
-                category: "Networking",
-                question: "Which topology requires a central controller or hub?",
-                options: ["Mesh", "Star", "Bus", "Ring"],
-                correctAnswer: 1,
-                explanation: "In a Star topology, all nodes are connected to a central device (hub or switch). If the central hub fails, the entire network fails. This is the most common topology in LANs."
+                explanation: "Spam refers to irrelevant or unsolicited messages sent over the Internet, typically to large numbers of users, for advertising or phishing."
             },
             {
-                id: 7,
-                category: "Networking Protocols",
-                question: "Identify the protocol used for remote login.",
-                options: ["FTP", "SMTP", "Telnet", "HTTP"],
+                category: "Internet",
+                question: "What is a Web Browser?",
+                options: ["Google", "Windows", "Google Chrome", "Modem"],
                 correctAnswer: 2,
-                explanation: "Telnet (Teletype Network) and SSH (Secure Shell) are protocols used for remote login to control a computer over a network. FTP is for files, SMTP for email, HTTP for web."
+                explanation: "Google Chrome is a software application (Web Browser) used to access the internet. 'Google' is a search engine, 'Windows' is an OS."
             },
             {
-                id: 8,
-                category: "Network Devices",
-                question: "A device that regenerates the signal to extend the range of a network is called a:",
-                options: ["Gateway", "Router", "Repeater", "Modem"],
-                correctAnswer: 2,
-                explanation: "A Repeater operates at the Physical layer. It receives a signal, regenerates/amplifies it, and retransmits it to extend the transmission distance. A Hub is essentially a multi-port repeater."
-            },
-            {
-                id: 9,
-                category: "MAC Address",
-                question: "What is the length of a MAC address?",
-                options: ["32 bits", "48 bits", "64 bits", "128 bits"],
+                category: "Security",
+                question: "Phishing is an attempt to:",
+                options: ["Improve PC speed", "Steal sensitive info", "Install a printer", "Clean viruses"],
                 correctAnswer: 1,
-                explanation: "A MAC (Media Access Control) address is a 48-bit unique identifier assigned to a network interface controller (NIC). It is usually represented as 6 pairs of hexadecimal digits."
+                explanation: "Phishing is a cyber attack where attackers disguise themselves as a trustworthy entity to steal sensitive data like passwords and credit card numbers."
             },
-            // --- TOPIC: DBMS & SQL (NCERT Focus) ---
             {
-                id: 10,
-                category: "SQL Keys",
-                question: "Which constraint ensures that all values in a column are different?",
-                options: ["NOT NULL", "UNIQUE", "DEFAULT", "CHECK"],
+                category: "PowerPoint",
+                question: "Which key is used to start a slideshow from the beginning?",
+                options: ["F1", "F5", "F7", "Esc"],
                 correctAnswer: 1,
-                explanation: "The UNIQUE constraint ensures that all values in a column are different. Primary Key also enforces uniqueness but can only be used once per table and cannot allow NULLs."
-            },
-            {
-                id: 11,
-                category: "SQL Commands",
-                question: "Which SQL clause is used to filter groups of rows created by the GROUP BY clause?",
-                options: ["WHERE", "ORDER BY", "HAVING", "SELECT"],
-                correctAnswer: 2,
-                explanation: "The 'WHERE' clause filters individual rows BEFORE grouping. The 'HAVING' clause filters groups AFTER the GROUP BY operation has occurred."
-            },
-            {
-                id: 12,
-                category: "SQL DDL/DML",
-                question: "Which of the following is a DDL (Data Definition Language) command?",
-                options: ["SELECT", "INSERT", "UPDATE", "ALTER"],
-                correctAnswer: 3,
-                explanation: "ALTER is a DDL command used to modify the structure of a table. SELECT, INSERT, UPDATE, and DELETE are DML (Data Manipulation Language) commands."
-            },
-            // --- TOPIC: COMPUTER SYSTEM ORGANIZATION (Boolean Logic/Number Systems) ---
-            {
-                id: 13,
-                category: "Boolean Logic",
-                question: "De Morgan's First Theorem states that: (A + B)' = ?",
-                options: ["A' + B'", "A' . B'", "A . B", "A' + B"],
-                correctAnswer: 1,
-                explanation: "De Morgan's First Law states that the complement of a logical sum equals the logical product of the complements: (A + B)' = A' . B'. (NOR is equivalent to Bubbled AND)."
-            },
-            {
-                id: 14,
-                category: "Number Systems",
-                question: "What is the hexadecimal equivalent of decimal 15?",
-                options: ["A", "C", "F", "E"],
-                correctAnswer: 2,
-                explanation: "In Hexadecimal (base-16): 0-9 represent values 0-9, and A=10, B=11, C=12, D=13, E=14, F=15. Thus, 15 is F."
-            },
-             {
-                id: 15,
-                category: "Encoding",
-                question: "What does ASCII stand for?",
-                options: ["American Standard Code for Information Interchange", "American Standard Code for Internet Interchange", "American Scientific Code for Information Interchange", "Asian Standard Code for Information Interchange"],
-                correctAnswer: 0,
-                explanation: "ASCII stands for 'American Standard Code for Information Interchange'. It is a 7-bit character encoding standard."
-            },
-            // --- TOPIC: SOCIETY, LAW & ETHICS ---
-            {
-                id: 16,
-                category: "Cyber Ethics",
-                question: "The act of copying someone else's work and passing it off as one's own is called:",
-                options: ["Phishing", "Plagiarism", "Spamming", "Hacking"],
-                correctAnswer: 1,
-                explanation: "Plagiarism is the unethical act of using someone else's ideas, work, or writings without proper attribution and presenting them as your own."
-            },
-            {
-                id: 17,
-                category: "Cyber Law",
-                question: "Which Act in India primarily deals with cybercrime and electronic commerce?",
-                options: ["IT Act 2000", "IPC 1860", "Copyright Act 1957", "Consumer Protection Act"],
-                correctAnswer: 0,
-                explanation: "The Information Technology Act, 2000 (IT Act 2000) is the primary law in India dealing with cybercrime and electronic commerce."
-            },
-            // --- MIXED BAG (Data Structures, OS) ---
-            {
-                id: 18,
-                category: "Data Structures",
-                question: "Which data structure is used in recursion management?",
-                options: ["Queue", "Linked List", "Stack", "Tree"],
-                correctAnswer: 2,
-                explanation: "Recursion uses a Stack (the Call Stack) to keep track of function calls. When a function calls itself, the current state is pushed onto the stack."
-            },
-            {
-                id: 19,
-                category: "Python Libraries",
-                question: "Which Python library is primarily used for Data Visualization?",
-                options: ["Pandas", "NumPy", "Matplotlib", "Django"],
-                correctAnswer: 2,
-                explanation: "Matplotlib (specifically the pyplot module) is the most common library for creating static, animated, and interactive visualizations in Python. Pandas is for analysis, Django for web."
-            },
-            {
-                id: 20,
-                category: "File Handling",
-                question: "Which mode is used to open a file for reading in binary format?",
-                options: ["'r'", "'rb'", "'w'", "'wb'"],
-                correctAnswer: 1,
-                explanation: "'r' is for reading text. 'rb' stands for 'Read Binary'. It is essential when handling non-text files like images or when precise byte handling is needed."
+                explanation: "F5 starts the presentation from the first slide. Shift+F5 starts it from the current slide."
             }
+        ];
+
+        // 3. GENERATOR FUNCTION
+        // This function creates hundreds of questions dynamically
+        const generateDatabase = () => {
+            let allQuestions = [...STATIC_QUESTIONS];
+            let idCounter = 100;
+
+            // Generate Shortcut Questions
+            SHORTCUTS_DB.forEach(item => {
+                // Type A: Key -> Action
+                const wrongActions = SHORTCUTS_DB.filter(x => x !== item).sort(() => 0.5 - Math.random()).slice(0, 3).map(x => x.action);
+                const optionsA = [item.action, ...wrongActions].sort(() => 0.5 - Math.random());
+                allQuestions.push({
+                    id: idCounter++,
+                    category: "Keyboard Shortcuts",
+                    question: `What is the function of the shortcut key '${item.key}'?`,
+                    options: optionsA,
+                    correctAnswer: optionsA.indexOf(item.action),
+                    explanation: `${item.key} is the standard shortcut used to ${item.action}.`
+                });
+            });
+
+            // Generate Full Form Questions
+            FULL_FORMS_DB.forEach(item => {
+                // Create fake options by mixing words
+                const fake1 = item.long.replace("Central", "Control").replace("Memory", "Module").replace("Protocol", "Platform");
+                const fake2 = item.long.replace("Random", "Read").replace("Universal", "United").replace("Transfer", "Text");
+                const fake3 = item.long + " System";
+                
+                const options = [item.long, fake1, fake2, fake3].slice(0,4).sort(() => 0.5 - Math.random());
+                
+                allQuestions.push({
+                    id: idCounter++,
+                    category: "Abbreviations",
+                    question: `What is the full form of '${item.short}'?`,
+                    options: options,
+                    correctAnswer: options.indexOf(item.long),
+                    explanation: `${item.short} stands for ${item.long}.`
+                });
+            });
+
+            // Generate Extension Questions
+            EXTENSIONS_DB.forEach(item => {
+                const wrongTypes = EXTENSIONS_DB.filter(x => x !== item).sort(() => 0.5 - Math.random()).slice(0, 3).map(x => x.type);
+                const options = [item.type, ...wrongTypes].sort(() => 0.5 - Math.random());
+                
+                allQuestions.push({
+                    id: idCounter++,
+                    category: "File Extensions",
+                    question: `The file extension '${item.ext}' represents which file type?`,
+                    options: options,
+                    correctAnswer: options.indexOf(item.type),
+                    explanation: `${item.ext} is the standard extension for ${item.type}.`
+                });
+            });
+
+            // Generate Unit Questions
+            UNITS_DB.forEach((item, idx) => {
+                if(idx < UNITS_DB.length - 1) {
+                   // e.g., How many KB in 1 MB?
+                   const nextUnit = UNITS_DB[idx+1]; // 1 MB
+                   const currUnit = item; // 1 KB (actually wait, logic is 1024 KB = 1 MB)
+                   // Let's do simple: 1 KB = ?
+                   const options = ["1000 Bytes", "1024 Bytes", "8 Bytes", "1024 Bits"];
+                   // A bit hard to generate generic wrong answers for units, so let's use the DB directly
+                   
+                   allQuestions.push({
+                       id: idCounter++,
+                       category: "Memory Units",
+                       question: `What is the value of ${item.unit}?`,
+                       options: [item.val, "100 Bytes", "512 Bits", "2048 Bytes"].sort(() => 0.5 - Math.random()), 
+                       correctAnswer: -1, // trick to calc dynamically below
+                       explanation: `${item.unit} is equal to ${item.val}. Computers use binary, so 2^10 = 1024.`
+                   });
+                   // Fix index for the pushed item
+                   const lastQ = allQuestions[allQuestions.length-1];
+                   lastQ.correctAnswer = lastQ.options.indexOf(item.val);
+                }
+            });
+
+            return allQuestions;
+        };
+
+        const FULL_DATABASE = generateDatabase();
+        
+        // 4. ROMANTIC PRAISES FOR VALENTINE MODE (Simple & Sweet)
+        const ROMANTIC_PRAISES = [
+            "You make my heart smile every single day! ❤️",
+            "You are my favorite person in the whole wide world.",
+            "I love your laugh, it's the best sound ever.",
+            "Guddan, you make everything better just by being there.",
+            "You are sweeter than the sweetest chocolate! 🍫",
+            "I am so lucky to have you in my life.",
+            "You are beautiful inside and out.",
+            "My day isn't complete until I talk to you.",
+            "You are my sunshine on a cloudy day. ☀️",
+            "Thinking of you makes me happy.",
+            "You are simply amazing, Guddan!",
+            "I love the way you are. Never change.",
+            "You have the kindest heart.",
+            "Being with you feels like home.",
+            "You are my best friend and my Valentine.",
+            "I appreciate everything you do.",
+            "You deserve all the happiness in the world.",
+            "You are perfect just the way you are.",
+            "Sending you a million hugs and kisses! XOXO",
+            "You light up every room you walk into. ✨"
         ];
 
         // --- COMPONENTS ---
 
         // 1. Animated Cat Component
-        const CatMascot = ({ mood }) => {
-            // Moods: 'neutral', 'happy', 'sad', 'thinking', 'peeking'
+        const CatMascot = ({ mood, message }) => {
+            // Moods: 'neutral', 'happy', 'sad', 'thinking', 'peeking', 'dancing', 'love'
             
             const getEyes = () => {
-                if (mood === 'happy') {
+                if (mood === 'happy' || mood === 'dancing' || mood === 'love') {
                     return (
                         <>
                             <path d="M70 100 Q80 90 90 100" fill="none" stroke="#374151" strokeWidth="4" strokeLinecap="round" />
@@ -292,42 +407,65 @@
                 }
             };
 
+            const animationClass = mood === 'dancing' || mood === 'love' ? 'animate-dance' : 'animate-float';
+
             return (
-                <div className={`w-32 h-32 md:w-40 md:h-40 relative animate-float transition-all duration-300`}>
-                    <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-lg">
-                        {/* Ears */}
-                        <path d="M40 70 L50 20 L90 60 Z" fill="#FDBA74" stroke="#EA580C" strokeWidth="3" strokeLinejoin="round" />
-                        <path d="M160 70 L150 20 L110 60 Z" fill="#FDBA74" stroke="#EA580C" strokeWidth="3" strokeLinejoin="round" />
-                        
-                        {/* Head */}
-                        <ellipse cx="100" cy="120" rx="75" ry="65" fill="#FFEDD5" stroke="#EA580C" strokeWidth="3" />
-                        
-                        {/* Eyes */}
-                        {getEyes()}
-                        
-                        {/* Nose */}
-                        <path d="M95 125 L105 125 L100 132 Z" fill="#F43F5E" />
-                        
-                        {/* Mouth */}
-                        <path d="M100 132 Q90 145 80 135" fill="none" stroke="#374151" strokeWidth="3" strokeLinecap="round" />
-                        <path d="M100 132 Q110 145 120 135" fill="none" stroke="#374151" strokeWidth="3" strokeLinecap="round" />
+                <div className="relative flex flex-col items-center">
+                    {/* Speech Bubble */}
+                    {message && (
+                        <div className="absolute -top-16 z-20 animate-bounce">
+                            <div className="bg-white border-2 border-indigo-600 px-4 py-2 rounded-2xl shadow-lg relative">
+                                <p className="text-indigo-800 font-bold whitespace-nowrap text-sm md:text-base">{message}</p>
+                                {/* Triangle arrow */}
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-indigo-600"></div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Floating Hearts for Love Mood */}
+                    {mood === 'love' && (
+                        <>
+                             <div className="absolute -top-10 -right-5 text-3xl animate-bounce">❤️</div>
+                             <div className="absolute -top-5 -left-8 text-2xl animate-pulse">💖</div>
+                        </>
+                    )}
 
-                        {/* Whiskers */}
-                        <g opacity="0.5">
-                            <line x1="50" y1="120" x2="20" y2="115" stroke="#374151" strokeWidth="2" />
-                            <line x1="50" y1="130" x2="20" y2="130" stroke="#374151" strokeWidth="2" />
-                            <line x1="150" y1="120" x2="180" y2="115" stroke="#374151" strokeWidth="2" />
-                            <line x1="150" y1="130" x2="180" y2="130" stroke="#374151" strokeWidth="2" />
-                        </g>
+                    <div className={`w-32 h-32 md:w-40 md:h-40 relative ${animationClass} transition-all duration-300`}>
+                        <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-lg">
+                            {/* Ears */}
+                            <path d="M40 70 L50 20 L90 60 Z" fill="#FDBA74" stroke="#EA580C" strokeWidth="3" strokeLinejoin="round" />
+                            <path d="M160 70 L150 20 L110 60 Z" fill="#FDBA74" stroke="#EA580C" strokeWidth="3" strokeLinejoin="round" />
+                            
+                            {/* Head */}
+                            <ellipse cx="100" cy="120" rx="75" ry="65" fill="#FFEDD5" stroke="#EA580C" strokeWidth="3" />
+                            
+                            {/* Eyes */}
+                            {getEyes()}
+                            
+                            {/* Nose */}
+                            <path d="M95 125 L105 125 L100 132 Z" fill="#F43F5E" />
+                            
+                            {/* Mouth */}
+                            <path d="M100 132 Q90 145 80 135" fill="none" stroke="#374151" strokeWidth="3" strokeLinecap="round" />
+                            <path d="M100 132 Q110 145 120 135" fill="none" stroke="#374151" strokeWidth="3" strokeLinecap="round" />
 
-                        {/* Paws if peeking */}
-                        {mood === 'peeking' && (
-                             <g>
-                                <ellipse cx="60" cy="170" rx="15" ry="10" fill="#fff" stroke="#EA580C" strokeWidth="2" />
-                                <ellipse cx="140" cy="170" rx="15" ry="10" fill="#fff" stroke="#EA580C" strokeWidth="2" />
-                             </g>
-                        )}
-                    </svg>
+                            {/* Whiskers */}
+                            <g opacity="0.5">
+                                <line x1="50" y1="120" x2="20" y2="115" stroke="#374151" strokeWidth="2" />
+                                <line x1="50" y1="130" x2="20" y2="130" stroke="#374151" strokeWidth="2" />
+                                <line x1="150" y1="120" x2="180" y2="115" stroke="#374151" strokeWidth="2" />
+                                <line x1="150" y1="130" x2="180" y2="130" stroke="#374151" strokeWidth="2" />
+                            </g>
+
+                            {/* Paws if peeking/dancing */}
+                            {(mood === 'peeking' || mood === 'dancing' || mood === 'love') && (
+                                <g>
+                                    <ellipse cx="60" cy="170" rx="15" ry="10" fill="#fff" stroke="#EA580C" strokeWidth="2" />
+                                    <ellipse cx="140" cy="170" rx="15" ry="10" fill="#fff" stroke="#EA580C" strokeWidth="2" />
+                                </g>
+                            )}
+                        </svg>
+                    </div>
                 </div>
             );
         };
@@ -338,7 +476,7 @@
             const [isFlipped, setIsFlipped] = useState(false);
             
             // Randomize cards once on mount
-            const cards = useMemo(() => [...QUESTION_DATABASE].sort(() => 0.5 - Math.random()), []);
+            const cards = useMemo(() => [...FULL_DATABASE].sort(() => 0.5 - Math.random()), []);
 
             const handleNext = (e) => {
                 e.stopPropagation();
@@ -361,7 +499,7 @@
             return (
                 <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4">
                     <div className="w-full flex justify-between items-center mb-6">
-                        <button onClick={goBack} className="flex items-center text-indigo-600 font-bold hover:underline">
+                        <button onClick={goBack} className="flex items-center text-blue-600 font-bold hover:underline">
                             ← Back to Menu
                         </button>
                         <h2 className="text-2xl font-bold text-gray-800">Flashcards ({currentIndex + 1}/{cards.length})</h2>
@@ -374,8 +512,8 @@
                             <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d shadow-xl rounded-2xl ${isFlipped ? 'rotate-y-180' : ''}`}>
                                 
                                 {/* FRONT */}
-                                <div className="absolute w-full h-full bg-white rounded-2xl p-8 flex flex-col items-center justify-center backface-hidden border-2 border-indigo-100">
-                                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4">Question</span>
+                                <div className="absolute w-full h-full bg-white rounded-2xl p-8 flex flex-col items-center justify-center backface-hidden border-2 border-blue-100">
+                                    <span className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">Question</span>
                                     <h3 className="text-xl md:text-2xl font-semibold text-center text-gray-800">
                                         {currentCard.question}
                                     </h3>
@@ -383,8 +521,8 @@
                                 </div>
 
                                 {/* BACK */}
-                                <div className="absolute w-full h-full bg-indigo-600 rounded-2xl p-8 flex flex-col items-center justify-center backface-hidden rotate-y-180 text-white">
-                                    <span className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-2">Answer</span>
+                                <div className="absolute w-full h-full bg-blue-600 rounded-2xl p-8 flex flex-col items-center justify-center backface-hidden rotate-y-180 text-white">
+                                    <span className="text-xs font-bold text-blue-200 uppercase tracking-widest mb-2">Answer</span>
                                     <h3 className="text-xl font-bold text-center mb-4 text-white">
                                         {currentCard.options[currentCard.correctAnswer]}
                                     </h3>
@@ -397,7 +535,7 @@
 
                         <div className="flex gap-4 mt-4">
                             <button onClick={handlePrev} className="px-6 py-2 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50 font-semibold">Prev</button>
-                            <button onClick={handleNext} className="px-6 py-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 font-semibold">Next Card</button>
+                            <button onClick={handleNext} className="px-6 py-2 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 font-semibold">Next Card</button>
                         </div>
                     </div>
                 </div>
@@ -405,6 +543,14 @@
         };
 
         // 3. Quiz Component
+        const WRONG_MESSAGES = [
+            "Dhyan se padho! 🧐",
+            "Neeche topic padho 👇",
+            "Galat jawaab, neeche dekho topic!",
+            "Arrreeeee 😿",
+            "Meowww!!! 🙀"
+        ];
+
         const QuizMode = ({ goBack }) => {
             const [questions, setQuestions] = useState([]);
             const [currentIndex, setCurrentIndex] = useState(0);
@@ -413,13 +559,14 @@
             const [showExplanation, setShowExplanation] = useState(false);
             const [isQuizFinished, setIsQuizFinished] = useState(false);
             const [catMood, setCatMood] = useState('neutral');
+            const [mascotMessage, setMascotMessage] = useState("");
 
             // Initialize Quiz
             useEffect(() => {
                 // 1. Shuffle full database
-                const shuffled = [...QUESTION_DATABASE].sort(() => 0.5 - Math.random());
-                // 2. Select 20 questions for the quiz
-                const selected = shuffled.slice(0, 20);
+                const shuffled = [...FULL_DATABASE].sort(() => 0.5 - Math.random());
+                // 2. Select 25 questions for the quiz
+                const selected = shuffled.slice(0, 25);
                 setQuestions(selected);
             }, []);
 
@@ -432,9 +579,12 @@
                 const currentQ = questions[currentIndex];
                 if (index === currentQ.correctAnswer) {
                     setScore(prev => prev + 1);
-                    setCatMood('happy');
+                    setCatMood('dancing');
+                    setMascotMessage("Purr-fect! 😻");
                 } else {
                     setCatMood('sad');
+                    const randomMsg = WRONG_MESSAGES[Math.floor(Math.random() * WRONG_MESSAGES.length)];
+                    setMascotMessage(randomMsg);
                 }
             };
 
@@ -444,9 +594,11 @@
                     setSelectedOption(null);
                     setShowExplanation(false);
                     setCatMood('thinking');
+                    setMascotMessage("");
                 } else {
                     setIsQuizFinished(true);
                     setCatMood('happy');
+                    setMascotMessage("You did it! 🎉");
                 }
             };
 
@@ -455,22 +607,22 @@
             if (isQuizFinished) {
                 return (
                     <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-2xl mx-auto p-6 text-center">
-                        <CatMascot mood="happy" />
+                        <CatMascot mood="dancing" message="We are done! 😺" />
                         <h2 className="text-4xl font-bold text-gray-800 mt-6 mb-2">Quiz Completed!</h2>
-                        <p className="text-xl text-gray-600 mb-8">You scored <span className="text-indigo-600 font-bold">{score}</span> out of {questions.length}</p>
+                        <p className="text-xl text-gray-600 mb-8">You scored <span className="text-blue-600 font-bold">{score}</span> out of {questions.length}</p>
                         
                         <div className="w-full bg-gray-200 rounded-full h-4 mb-8">
                             <div 
-                                className="bg-indigo-600 h-4 rounded-full transition-all duration-1000" 
+                                className="bg-blue-600 h-4 rounded-full transition-all duration-1000" 
                                 style={{ width: `${(score / questions.length) * 100}%` }}
                             ></div>
                         </div>
 
                         <div className="flex gap-4">
-                            <button onClick={goBack} className="px-8 py-3 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-bold hover:bg-indigo-50 transition-colors">
+                            <button onClick={goBack} className="px-8 py-3 bg-white border-2 border-blue-600 text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-colors">
                                 Menu
                             </button>
-                            <button onClick={() => window.location.reload()} className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg transition-transform hover:-translate-y-1">
+                            <button onClick={() => window.location.reload()} className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg transition-transform hover:-translate-y-1">
                                 Retake Quiz
                             </button>
                         </div>
@@ -484,10 +636,10 @@
                 <div className="max-w-3xl mx-auto p-4 w-full">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
-                         <button onClick={goBack} className="text-sm font-bold text-gray-500 hover:text-indigo-600">
+                         <button onClick={goBack} className="text-sm font-bold text-gray-500 hover:text-blue-600">
                             ✕ Exit
                         </button>
-                        <div className="bg-white px-4 py-1 rounded-full shadow-sm border border-gray-200 font-bold text-indigo-600">
+                        <div className="bg-white px-4 py-1 rounded-full shadow-sm border border-gray-200 font-bold text-blue-600">
                             Q {currentIndex + 1} / {questions.length}
                         </div>
                         <div className="font-bold text-gray-700">
@@ -498,17 +650,17 @@
                     <div className="flex flex-col md:flex-row gap-6 items-start">
                         {/* Left: Mascot */}
                         <div className="hidden md:flex flex-col items-center w-48 shrink-0">
-                            <CatMascot mood={catMood} />
-                            <div className="mt-4 text-center text-sm text-gray-500 font-medium bg-white p-2 rounded-lg shadow-sm w-full">
+                            <CatMascot mood={catMood} message={mascotMessage} />
+                            <div className="mt-8 text-center text-sm text-gray-500 font-medium bg-white p-2 rounded-lg shadow-sm w-full">
                                 {catMood === 'neutral' || catMood === 'thinking' ? "Good Luck!" : 
-                                 catMood === 'happy' ? "Purr-fect!" : "Oh no..."}
+                                 catMood === 'dancing' ? "Keep going!" : "Try again!"}
                             </div>
                         </div>
 
                         {/* Right: Question Card */}
                         <div className="flex-1 w-full">
                             <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8 border border-gray-100">
-                                <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full mb-4">
+                                <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full mb-4">
                                     {currentQ.category}
                                 </span>
                                 <h3 className="text-xl font-bold text-gray-800 mb-6 leading-relaxed">
@@ -520,7 +672,7 @@
                                         let btnClass = "w-full text-left p-4 rounded-xl border-2 transition-all duration-200 font-medium ";
                                         
                                         if (selectedOption === null) {
-                                            btnClass += "border-gray-100 hover:border-indigo-300 hover:bg-indigo-50 bg-gray-50 text-gray-700";
+                                            btnClass += "border-gray-100 hover:border-blue-300 hover:bg-blue-50 bg-gray-50 text-gray-700";
                                         } else {
                                             if (idx === currentQ.correctAnswer) {
                                                 btnClass += "border-green-500 bg-green-50 text-green-700"; // Correct
@@ -549,7 +701,7 @@
                             {/* Explanation Area */}
                             {showExplanation && (
                                 <div className="mt-6 animate-float" style={{ animationDuration: '0.5s', animationIterationCount: 1 }}>
-                                    <div className="bg-indigo-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                                    <div className="bg-blue-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
                                         
                                         <div className="flex items-start gap-4 relative z-10">
@@ -560,7 +712,7 @@
                                                 <h4 className="font-bold text-lg mb-2">
                                                     {selectedOption === currentQ.correctAnswer ? 'Correct!' : 'Explanation:'}
                                                 </h4>
-                                                <p className="text-indigo-100 leading-relaxed text-sm md:text-base">
+                                                <p className="text-blue-100 leading-relaxed text-sm md:text-base">
                                                     {currentQ.explanation}
                                                 </p>
                                             </div>
@@ -569,7 +721,7 @@
                                     
                                     <button 
                                         onClick={handleNext}
-                                        className="mt-6 w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-indigo-700 transform transition-transform active:scale-95 flex items-center justify-center gap-2"
+                                        className="mt-6 w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transform transition-transform active:scale-95 flex items-center justify-center gap-2"
                                     >
                                         {currentIndex === questions.length - 1 ? 'Finish Quiz' : 'Next Question →'}
                                     </button>
@@ -581,67 +733,223 @@
             );
         };
 
-        // 4. Main Menu Component
-        const MainMenu = ({ onStartQuiz, onStartFlashcards }) => {
+        // 4. Valentine Mode Component
+        const ValentineMode = ({ goBack }) => {
+            const [accepted, setAccepted] = useState(false);
+            const [noBtnPos, setNoBtnPos] = useState({ top: 'auto', left: 'auto', position: 'static' });
+            const [currentPraise, setCurrentPraise] = useState("");
+            
+            // Generate a random praise only when accepted changes to true
+            useEffect(() => {
+                if(accepted) {
+                    const random = ROMANTIC_PRAISES[Math.floor(Math.random() * ROMANTIC_PRAISES.length)];
+                    setCurrentPraise(random);
+                }
+            }, [accepted]);
+
+            const handleNoHover = () => {
+                const btnWidth = 100; // estimated
+                const btnHeight = 50; // estimated
+                const padding = 20;
+
+                // Ensure we stay STRICTLY within the window
+                // Max X = width - button width - padding
+                // Max Y = height - button height - padding
+                const maxX = window.innerWidth - btnWidth - padding;
+                const maxY = window.innerHeight - btnHeight - padding;
+                
+                // Random position within these bounds
+                let randomX = Math.max(padding, Math.random() * maxX);
+                let randomY = Math.max(padding, Math.random() * maxY);
+                
+                // Extra check to avoid exact center (where YES button usually is)
+                // Center area approx: width/2 +/- 100, height/2 +/- 50
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                
+                if (Math.abs(randomX - centerX) < 150 && Math.abs(randomY - centerY) < 100) {
+                    // Too close to center, shift it
+                    randomX = randomX < centerX ? 20 : maxX - 20;
+                }
+
+                setNoBtnPos({
+                    position: 'fixed',
+                    left: `${randomX}px`,
+                    top: `${randomY}px`,
+                    transition: 'all 0.2s ease-out',
+                    zIndex: 50
+                });
+            };
+
+            const getNewPraise = () => {
+                 let newPraise = currentPraise;
+                 while(newPraise === currentPraise) {
+                     newPraise = ROMANTIC_PRAISES[Math.floor(Math.random() * ROMANTIC_PRAISES.length)];
+                 }
+                 setCurrentPraise(newPraise);
+            }
+
+            if (accepted) {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-pink-50 relative overflow-hidden text-center">
+                        <div className="absolute inset-0 pointer-events-none">
+                            {[...Array(20)].map((_, i) => (
+                                <div key={i} className="absolute animate-float text-red-400 opacity-40" 
+                                     style={{ 
+                                         left: `${Math.random()*100}%`, 
+                                         top: `${Math.random()*100}%`,
+                                         animationDelay: `${Math.random()*5}s`,
+                                         fontSize: `${Math.random()*20 + 20}px`
+                                     }}>
+                                    ❤️
+                                </div>
+                            ))}
+                        </div>
+
+                        <CatMascot mood="love" message="I knew it! 😻" />
+                        
+                        <h1 className="text-5xl font-black text-pink-600 mt-6 mb-4 animate-heartbeat text-center">
+                            YAAAY! 🎉
+                        </h1>
+                        <p className="text-xl text-gray-600 mb-8 text-center font-semibold">
+                            Guddan badmos, you've made me the happiest! ❤️
+                        </p>
+
+                        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-10 max-w-2xl w-full shadow-2xl border-4 border-pink-200 transform hover:scale-[1.02] transition-transform duration-300">
+                             <div className="text-6xl mb-4">💌</div>
+                             <h3 className="text-2xl md:text-3xl font-bold text-gray-800 leading-relaxed font-handwriting">
+                                "{currentPraise}"
+                            </h3>
+                            <button 
+                                onClick={getNewPraise}
+                                className="mt-8 text-sm text-pink-500 hover:text-pink-700 font-bold underline"
+                            >
+                                Read another note ↺
+                            </button>
+                        </div>
+
+                        <button onClick={goBack} className="mt-12 px-8 py-3 bg-white border-2 border-pink-500 text-pink-500 rounded-full font-bold hover:bg-pink-50 transition-colors z-50 shadow-md">
+                            Back to Studying 🤓
+                        </button>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-pink-100 to-red-50 relative overflow-hidden">
+                    <button onClick={goBack} className="absolute top-6 left-6 text-pink-400 hover:text-pink-600 font-bold z-10">
+                         ← Exit
+                    </button>
+
+                    <CatMascot mood="love" />
+                    
+                    <div className="bg-white/60 backdrop-blur-md p-10 rounded-3xl shadow-xl text-center border border-white max-w-lg mt-8 relative z-10">
+                        <h1 className="text-3xl md:text-4xl font-black text-pink-600 mb-8 leading-tight">
+                            Will you be my valentine,<br/>
+                            <span className="text-4xl md:text-5xl text-red-500">Guddan Badmos?</span> 🥺
+                        </h1>
+
+                        <div className="flex items-center justify-center gap-8 h-20 relative">
+                            <button 
+                                onClick={() => setAccepted(true)}
+                                className="px-10 py-4 bg-red-500 text-white text-xl font-bold rounded-full shadow-lg hover:bg-red-600 hover:scale-110 transition-all duration-300 transform hover:shadow-red-300/50 z-20"
+                            >
+                                YES 💖
+                            </button>
+
+                            <button
+                                onMouseEnter={handleNoHover}
+                                onClick={handleNoHover}
+                                style={noBtnPos}
+                                className="px-6 py-2 bg-gray-200 text-gray-500 text-sm font-medium rounded-full cursor-pointer min-w-[80px]"
+                            >
+                                No 💔
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 5. Main Menu Component
+        const MainMenu = ({ onStartQuiz, onStartFlashcards, onStartValentine }) => {
             return (
                 <div className="min-h-screen flex flex-col items-center justify-center p-4">
                     <div className="text-center mb-10">
                         <CatMascot mood="happy" />
                         <h1 className="text-4xl md:text-6xl font-black text-gray-800 mt-6 tracking-tight">
-                            CS Prep <span className="text-indigo-600">Master</span>
+                            Math Teachers <span className="text-blue-600">Computer Prep</span>
                         </h1>
                         <p className="text-gray-500 mt-4 text-lg max-w-md mx-auto">
-                            Master Computer Science for KVS, CBSE & Govt Teaching Exams with our interactive cat-guided quizzes.
+                            Master General Computer Literacy (ICT) for KVS, CBSE & Govt Teaching Exams. No coding, just essentials!
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6 w-full max-w-2xl">
+                    <div className="grid md:grid-cols-2 gap-6 w-full max-w-2xl mb-8">
                         <button 
                             onClick={onStartQuiz}
-                            className="group relative bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-indigo-500 text-left overflow-hidden"
+                            className="group relative bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-500 text-left overflow-hidden"
                         >
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                 <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" /></svg>
                             </div>
-                            <span className="inline-block p-3 bg-indigo-100 text-indigo-600 rounded-xl mb-4">
-                                📝 25 Marks
+                            <span className="inline-block p-3 bg-blue-100 text-blue-600 rounded-xl mb-4">
+                                📝 25 Marks Quiz
                             </span>
                             <h3 className="text-2xl font-bold text-gray-800 mb-2">Take a Quiz</h3>
-                            <p className="text-gray-500">Practice with random questions from our database. Perfect for exam simulation.</p>
+                            <p className="text-gray-500">Practice with random questions generated from our huge database. Covers Hardware, Office & Internet.</p>
                         </button>
 
                         <button 
                             onClick={onStartFlashcards}
-                            className="group relative bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-orange-500 text-left overflow-hidden"
+                            className="group relative bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-teal-500 text-left overflow-hidden"
                         >
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                 <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
                             </div>
-                            <span className="inline-block p-3 bg-orange-100 text-orange-600 rounded-xl mb-4">
+                            <span className="inline-block p-3 bg-teal-100 text-teal-600 rounded-xl mb-4">
                                 🧠 Study Mode
                             </span>
                             <h3 className="text-2xl font-bold text-gray-800 mb-2">Flashcards</h3>
-                            <p className="text-gray-500">Flip through topics to memorize concepts, definitions, and syntax.</p>
+                            <p className="text-gray-500">Flip through Shortcuts, Full Forms, and Tech Terms to memorize them quickly.</p>
+                        </button>
+                    </div>
+
+                    {/* Valentine Section Box */}
+                    <div className="w-full max-w-2xl bg-gradient-to-r from-pink-50 to-red-50 border-2 border-pink-100 rounded-3xl p-1 shadow-sm hover:shadow-md transition-shadow">
+                        <button 
+                            onClick={onStartValentine}
+                            className="w-full h-full flex items-center justify-between p-6 rounded-2xl bg-white/50 hover:bg-white/80 transition-colors"
+                        >
+                            <div className="flex items-center gap-4">
+                                <span className="text-3xl animate-bounce">💌</span>
+                                <div className="text-left">
+                                    <h3 className="font-bold text-pink-600 text-lg">Special Request</h3>
+                                    <p className="text-xs text-gray-500">For Guddan Badmos only 🤫</p>
+                                </div>
+                            </div>
+                            <span className="text-pink-400 font-bold">Open →</span>
                         </button>
                     </div>
                     
                     <footer className="mt-12 text-gray-400 text-sm">
-                        Database contains high-yield questions from last 5 years.
+                        Database includes high-yield ICT questions from last 5 years.
                     </footer>
                 </div>
             );
         };
 
-        // 5. App Orchestrator
+        // 6. App Orchestrator
         const App = () => {
-            const [view, setView] = useState('menu'); // 'menu', 'quiz', 'flashcards'
+            const [view, setView] = useState('menu'); // 'menu', 'quiz', 'flashcards', 'valentine'
 
             return (
-                <div className="min-h-screen bg-gradient-to-br from-green-50 via-indigo-50 to-blue-50">
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-white selection:bg-pink-200">
                     {view === 'menu' && (
                         <MainMenu 
                             onStartQuiz={() => setView('quiz')} 
                             onStartFlashcards={() => setView('flashcards')} 
+                            onStartValentine={() => setView('valentine')}
                         />
                     )}
                     {view === 'quiz' && (
@@ -653,6 +961,9 @@
                         <div className="min-h-screen flex items-center">
                             <FlashcardMode goBack={() => setView('menu')} />
                         </div>
+                    )}
+                    {view === 'valentine' && (
+                        <ValentineMode goBack={() => setView('menu')} />
                     )}
                 </div>
             );
