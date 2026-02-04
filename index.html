@@ -3,658 +3,660 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Will you be my Valentine?</title>
+    <title>CS Prep Master - KV/CBSE/Govt Exams</title>
     
-    <!-- Tailwind CSS for styling -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- React and ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     
-    <!-- Babel for JSX support -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        /* Custom Animations */
-        @keyframes shimmer {
-            0% { transform: translateX(-150%) skewX(-20deg); }
-            100% { transform: translateX(150%) skewX(-20deg); }
-        }
-        .animate-shimmer {
-            animation: shimmer 2s infinite;
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* Light green tint */
         }
         
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-        }
-        .animate-float {
-            animation-name: float;
-            animation-timing-function: linear;
-            animation-iteration-count: infinite;
-        }
-        
-        @keyframes sway {
-            0%, 100% { transform: rotate(-10deg); }
-            50% { transform: rotate(10deg); }
-        }
-        .animate-sway {
-            animation: sway 2s ease-in-out infinite;
+        h1, h2, h3, button {
+            font-family: 'Fredoka', sans-serif;
         }
 
-        /* Prevent scrolling on mobile when trying to catch the button */
-        body {
-            overscroll-behavior: none;
+        /* Flashcard Flip Animation */
+        .perspective-1000 {
+            perspective: 1000px;
         }
         
-        /* Quiz specific styles */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbar for Explanation Area */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="bg-[#FDF2F8]">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useMemo } = React;
 
-        // --- DATA: 100 Computer Science Questions ---
-        const QUESTIONS_DB = [
-            // --- FUNDAMENTALS & HISTORY ---
-            { id: 1, question: "Which component is known as the 'brain' of the computer?", options: ["Monitor", "CPU", "RAM", "Hard Disk"], answer: 1, explanation: "The CPU (Central Processing Unit) performs all processing and calculations." },
-            { id: 2, question: "Who is known as the father of the computer?", options: ["Alan Turing", "Charles Babbage", "Bill Gates", "Steve Jobs"], answer: 1, explanation: "Charles Babbage designed the Analytical Engine, the precursor to modern computers." },
-            { id: 3, question: "Identify the smallest unit of data in a computer.", options: ["Byte", "Bit", "Nibble", "KB"], answer: 1, explanation: "A Bit (Binary Digit, 0 or 1) is the absolute smallest unit of data." },
-            { id: 4, question: "1 Byte is equal to how many bits?", options: ["4", "8", "16", "32"], answer: 1, explanation: "1 Byte = 8 Bits. A group of 4 bits is called a Nibble." },
-            { id: 5, question: "Which generation of computers used Vacuum Tubes?", options: ["First", "Second", "Third", "Fourth"], answer: 0, explanation: "First Generation computers (1940-1956) used Vacuum Tubes." },
-            { id: 6, question: "The binary number system uses which base?", options: ["10", "8", "2", "16"], answer: 2, explanation: "Binary uses base 2 (consisting only of digits 0 and 1)." },
-            { id: 7, question: "Which of these is NOT a characteristic of a computer?", options: ["Speed", "Accuracy", "IQ", "Diligence"], answer: 2, explanation: "Computers have zero IQ; they cannot think on their own." },
-            { id: 8, question: "What does ALU stand for?", options: ["Arithmetic Logic Unit", "All Logic Unit", "Arithmetic Local Unit", "Advanced Logic Unit"], answer: 0, explanation: "ALU is the part of the CPU that handles math and logic operations." },
-            { id: 9, question: "Which language does the computer understand directly?", options: ["High-Level Language", "Assembly Language", "Machine Language", "English"], answer: 2, explanation: "Computers only understand Machine Language (0s and 1s) directly." },
-            { id: 10, question: "1 Kilobyte (KB) is equal to?", options: ["1000 Bytes", "1024 Bytes", "1024 Bits", "1000 Bits"], answer: 1, explanation: "In binary systems, 1 KB is exactly 1024 Bytes." },
-            // --- HARDWARE & INPUT/OUTPUT ---
-            { id: 11, question: "Which of the following is an Input Device?", options: ["Printer", "Speaker", "Scanner", "Monitor"], answer: 2, explanation: "A Scanner inputs physical documents into digital form." },
-            { id: 12, question: "Which of these is an Output Device?", options: ["Joystick", "Microphone", "Plotter", "Light Pen"], answer: 2, explanation: "A Plotter is used to print high-quality vector graphics (output)." },
-            { id: 13, question: "The printed output from a computer is called?", options: ["Soft Copy", "Hard Copy", "Carbon Copy", "Paper Copy"], answer: 1, explanation: "Physical output on paper is referred to as Hard Copy." },
-            { id: 14, question: "Which key is used to refresh the active window?", options: ["F2", "F5", "F7", "F12"], answer: 1, explanation: "F5 is the standard function key for Refresh." },
-            { id: 15, question: "Which device is required for an Internet connection?", options: ["Joystick", "Modem", "CD Drive", "NIC Card"], answer: 1, explanation: "A Modem (Modulator-Demodulator) is essential for internet connectivity." },
-            { id: 16, question: "Which of these is a Pointing Device?", options: ["Keyboard", "Mouse", "Scanner", "Printer"], answer: 1, explanation: "A Mouse is a pointing device used to move the cursor." },
-            { id: 17, question: "What does USB stand for?", options: ["Universal Serial Bus", "Unique Serial Bus", "Universal Service Bus", "United Serial Bus"], answer: 0, explanation: "USB stands for Universal Serial Bus, a standard for cables/connectors." },
-            { id: 18, question: "Which key is used to rename a selected file?", options: ["F2", "F4", "F5", "F12"], answer: 0, explanation: "F2 is the shortcut key to Rename a file or folder." },
-            { id: 19, question: "Which type of printer uses toner?", options: ["Inkjet", "Dot Matrix", "Laser", "Thermal"], answer: 2, explanation: "Laser printers use toner powder, while Inkjet printers use liquid ink." },
-            { id: 20, question: "The resolution of a printer is measured in?", options: ["DPI", "PPM", "LPM", "BPS"], answer: 0, explanation: "DPI stands for Dots Per Inch." },
-            // --- MEMORY ---
-            { id: 21, question: "What does RAM stand for?", options: ["Read Access Memory", "Random Access Memory", "Read Anytime Memory", "Remote Access Model"], answer: 1, explanation: "RAM is Random Access Memory, the computer's short-term memory." },
-            { id: 22, question: "Which memory is non-volatile?", options: ["RAM", "Cache", "ROM", "Register"], answer: 2, explanation: "ROM (Read Only Memory) retains data without power." },
-            { id: 23, question: "Which is the fastest memory in a computer?", options: ["RAM", "Hard Disk", "Cache Memory", "DVD"], answer: 2, explanation: "Cache Memory is smaller but faster than RAM, located close to the CPU." },
-            { id: 24, question: "CD-ROM stands for?", options: ["Compactable Read Only Memory", "Compact Data Read Only Memory", "Compact Disk Read Only Memory", "Computer Disk Read Only Memory"], answer: 2, explanation: "Compact Disk Read Only Memory." },
-            { id: 25, question: "Which storage device can hold the most data?", options: ["Floppy Disk", "CD", "DVD", "Hard Disk"], answer: 3, explanation: "Hard Disks (TB range) store much more than Floppies (MB), CDs (700MB), or DVDs (4.7GB)." },
-            // --- SOFTWARE & OS ---
-            { id: 26, question: "Which of these is NOT an Operating System?", options: ["Windows", "Linux", "Oracle", "Android"], answer: 2, explanation: "Oracle is a Database Management System (DBMS), not an OS." },
-            { id: 27, question: "GUI stands for?", options: ["Graphical User Interface", "General User Interconnect", "Global User Interface", "Graphical Union Interface"], answer: 0, explanation: "GUI allows users to interact via icons rather than text commands." },
-            { id: 28, question: "Linux is an example of?", options: ["Application Software", "Open Source Software", "Shareware", "Proprietary Software"], answer: 1, explanation: "Linux is a famous Open Source Operating System." },
-            { id: 29, question: "Which program runs the computer hardware?", options: ["Operating System", "Browser", "Compiler", "Antivirus"], answer: 0, explanation: "The OS manages hardware and software resources." },
-            { id: 30, question: "What is 'booting'?", options: ["Starting the computer", "Scanning for viruses", "Installing a program", "Turning off the computer"], answer: 0, explanation: "Booting is the process of starting or restarting a computer." },
-            { id: 31, question: "Which software is used to view web pages?", options: ["Word Processor", "Spreadsheet", "Web Browser", "Media Player"], answer: 2, explanation: "Web Browsers (Chrome, Edge, etc.) render web pages." },
-            { id: 32, question: "A computer virus is a?", options: ["Hardware", "Software/Program", "Bacteria", "Freeware"], answer: 1, explanation: "A virus is a malicious software program." },
-            { id: 33, question: "What is the full form of PDF?", options: ["Printed Document Format", "Portable Document Format", "Public Document File", "Published Data Format"], answer: 1, explanation: "Portable Document Format, developed by Adobe." },
-            { id: 34, question: "Which one is a System Software?", options: ["MS Word", "Photoshop", "Windows 10", "Chrome"], answer: 2, explanation: "Windows 10 is an OS (System Software); others are Applications." },
-            { id: 35, question: "What is the file extension of a Notepad file?", options: [".doc", ".txt", ".ppt", ".xls"], answer: 1, explanation: "Notepad creates plain text files (.txt)." },
-            // --- MS OFFICE & SHORTCUTS ---
-            { id: 36, question: "Which shortcut is used to Copy selected text?", options: ["Ctrl + V", "Ctrl + X", "Ctrl + C", "Ctrl + P"], answer: 2, explanation: "Ctrl + C = Copy." },
-            { id: 37, question: "Which shortcut is used to Paste?", options: ["Ctrl + P", "Ctrl + V", "Ctrl + S", "Ctrl + X"], answer: 1, explanation: "Ctrl + V = Paste." },
-            { id: 38, question: "Which shortcut is used to Undo?", options: ["Ctrl + Z", "Ctrl + Y", "Ctrl + U", "Ctrl + D"], answer: 0, explanation: "Ctrl + Z = Undo. Ctrl + Y = Redo." },
-            { id: 39, question: "Ctrl + B is used to?", options: ["Italicize", "Underline", "Bold", "Break"], answer: 2, explanation: "Ctrl + B makes the selected text Bold." },
-            { id: 40, question: "What is the intersection of a row and column in Excel called?", options: ["Box", "Grid", "Cell", "Table"], answer: 2, explanation: "A Cell is the basic unit of a worksheet." },
-            { id: 41, question: "Which function calculates the largest value in Excel?", options: ["HIGH()", "MAX()", "LARGE()", "TOP()"], answer: 1, explanation: "The MAX() function returns the largest number." },
-            { id: 42, question: "In MS Word, 'Portrait' and 'Landscape' are examples of?", options: ["Page Size", "Page Orientation", "Page Layout", "Page Margin"], answer: 1, explanation: "They are Page Orientations." },
-            { id: 43, question: "The default extension for MS Word 2010+ is?", options: [".doc", ".docx", ".txt", ".pdf"], answer: 1, explanation: ".docx is the XML-based format used in newer Word versions." },
-            { id: 44, question: "Which key is used to start a slideshow in PowerPoint?", options: ["F1", "F2", "F5", "F10"], answer: 2, explanation: "F5 starts the presentation from the beginning." },
-            { id: 45, question: "Which shortcut centers the text?", options: ["Ctrl + C", "Ctrl + E", "Ctrl + R", "Ctrl + L"], answer: 1, explanation: "Ctrl + E is used for Center alignment." },
-            { id: 46, question: "To select the entire document, we use?", options: ["Ctrl + A", "Ctrl + S", "Shift + A", "Alt + A"], answer: 0, explanation: "Ctrl + A (Select All)." },
-            { id: 47, question: "What is the default number of worksheets in a new Excel 2016 workbook?", options: ["3", "1", "5", "2"], answer: 1, explanation: "Older versions had 3, but typically recent versions (2013+) default to 1." },
-            { id: 48, question: "Which feature is used to send the same letter to multiple people?", options: ["Macro", "Template", "Mail Merge", "Consolidate"], answer: 2, explanation: "Mail Merge allows creating personalized letters for many recipients." },
-            { id: 49, question: "A collection of slides is called a?", options: ["Document", "Workbook", "Presentation", "Sheet"], answer: 2, explanation: "PowerPoint creates Presentations." },
-            { id: 50, question: "The shortcut to Save a file is?", options: ["Ctrl + S", "Alt + S", "Shift + S", "F1"], answer: 0, explanation: "Ctrl + S saves the current document." },
-            // --- INTERNET & NETWORKING ---
-            { id: 51, question: "What is the full form of HTTP?", options: ["Hyper Text Transfer Protocol", "High Transfer Text Protocol", "Hyper Transfer Text Path", "Hyper Text Tool Protocol"], answer: 0, explanation: "The protocol used for transferring web pages." },
-            { id: 52, question: "WWW stands for?", options: ["World Wide Web", "World Web Wide", "Wide World Web", "Web World Wide"], answer: 0, explanation: "World Wide Web." },
-            { id: 53, question: "Which of the following is a Search Engine?", options: ["Chrome", "Google", "Firefox", "Edge"], answer: 1, explanation: "Google is a search engine; the others are browsers." },
-            { id: 54, question: "Junk email is also known as?", options: ["Spam", "Spoof", "Sniffer", "Spool"], answer: 0, explanation: "Unsolicited bulk email is called Spam." },
-            { id: 55, question: "What is the full form of LAN?", options: ["Local Area Network", "Large Area Network", "Local Access Network", "Long Area Network"], answer: 0, explanation: "LAN covers a small area like a home or office." },
-            { id: 56, question: "Which protocol is used for sending emails?", options: ["HTTP", "FTP", "SMTP", "POP3"], answer: 2, explanation: "SMTP (Simple Mail Transfer Protocol) sends mail." },
-            { id: 57, question: "A website's main page is called?", options: ["Browser Page", "Search Page", "Home Page", "Bookmark"], answer: 2, explanation: "The introductory page of a website is the Home Page." },
-            { id: 58, question: "Which is a valid IP address?", options: ["192.168.1.1", "999.999.999.999", "123.456", "192.168"], answer: 0, explanation: "IP addresses are 4 octets (0-255) separated by dots." },
-            { id: 59, question: "What does URL stand for?", options: ["Uniform Resource Locator", "Uniform Resource Link", "Universal Resource Locator", "United Resource Link"], answer: 0, explanation: "URL is the address of a resource on the internet." },
-            { id: 60, question: "Which device connects a computer to a telephone line?", options: ["Router", "Switch", "Modem", "Hub"], answer: 2, explanation: "Modems translate digital signals to analog phone signals (and vice versa)." },
-            { id: 61, question: "What does HTML stand for?", options: ["Hyper Text Markup Language", "High Text Make Language", "Hyper Tabular Markup Language", "Hyper Text Machine Language"], answer: 0, explanation: "The standard language for creating web pages." },
-            { id: 62, question: "Wi-Fi stands for?", options: ["Wireless Fidelity", "Wireless Field", "Wide Fidelity", "Wire Fire"], answer: 0, explanation: "Wireless Fidelity." },
-            { id: 63, question: "The unique address of a network card is called?", options: ["IP Address", "MAC Address", "URL", "DNS"], answer: 1, explanation: "Media Access Control (MAC) address is the hardware address." },
-            { id: 64, question: "In email, BCC stands for?", options: ["Blind Carbon Copy", "Black Carbon Copy", "Back Carbon Copy", "Blind Copy Carbon"], answer: 0, explanation: "BCC hides the recipient's email from others." },
-            { id: 65, question: "Buying and selling goods over the internet is called?", options: ["E-Commerce", "E-Business", "E-Trade", "E-Market"], answer: 0, explanation: "Electronic Commerce." },
-            // --- CYBER SECURITY & ETHICS ---
-            { id: 66, question: "Which software protects against viruses?", options: ["Firewall", "Antivirus", "Firmware", "Spyware"], answer: 1, explanation: "Antivirus software detects and removes malware." },
-            { id: 67, question: "A network security system that monitors and controls traffic is?", options: ["Antivirus", "Firewall", "Cookie", "Spam"], answer: 1, explanation: "A Firewall acts as a barrier between a trusted and an untrusted network." },
-            { id: 68, question: "Stealing someone's personal information to pretend to be them is?", options: ["Phishing", "Hacking", "Identity Theft", "Spamming"], answer: 2, explanation: "Identity Theft involves using someone else's credentials." },
-            { id: 69, question: "What is 'Phishing'?", options: ["Fishing on a boat", "Scanning a disk", "Fraudulent emails to get data", "Checking connectivity"], answer: 2, explanation: "Phishing involves tricking users into revealing sensitive info." },
-            { id: 70, question: "Copyright laws protect?", options: ["Hardware", "Ideas", "Original Works", "Brands"], answer: 2, explanation: "Copyright protects original creative works (books, software, art)." },
-            // --- MIXED BAG ---
-            { id: 71, question: "BIOS stands for?", options: ["Basic Input Output System", "Binary Input Output System", "Basic Internal Output System", "Basic Intra Operating System"], answer: 0, explanation: "BIOS initializes hardware during booting." },
-            { id: 72, question: "Which of these is a valid email address?", options: ["user.gmail.com", "user@gmail.com", "user@gmail", "gmail.com@user"], answer: 1, explanation: "Format: username@domain.com." },
-            { id: 73, question: "1 GB is equal to?", options: ["1024 MB", "1000 MB", "1024 KB", "1024 TB"], answer: 0, explanation: "1 Gigabyte = 1024 Megabytes." },
-            { id: 74, question: "Which key cancels the current operation?", options: ["Shift", "Ctrl", "Esc", "Alt"], answer: 2, explanation: "Escape (Esc) is used to cancel or exit." },
-            { id: 75, question: "What is the full form of VIRUS?", options: ["Vital Information Resources Under Siege", "Very Important Resource Under Siege", "Virtual Information Resource Under Seizure", "Vital Information Resource Under System"], answer: 0, explanation: "Vital Information Resources Under Siege." },
-            { id: 76, question: "The speed of a CPU is typically measured in?", options: ["GB", "MHz / GHz", "Mbps", "RPM"], answer: 1, explanation: "Hertz (Gigahertz) measures processor clock speed." },
-            { id: 77, question: "Which bar shows the start button?", options: ["Title Bar", "Status Bar", "Taskbar", "Scroll Bar"], answer: 2, explanation: "The Taskbar (usually at the bottom) contains the Start button." },
-            { id: 78, question: "To move to the beginning of a line, press?", options: ["End", "Home", "Ctrl + Home", "Page Up"], answer: 1, explanation: "Home key moves cursor to the start of the line." },
-            { id: 79, question: "Which device is used for playing games?", options: ["Scanner", "Joystick", "Microphone", "Printer"], answer: 1, explanation: "Joysticks are popular input devices for gaming." },
-            { id: 80, question: "What is the full form of UPS?", options: ["Uninterruptible Power Supply", "Uniform Power Supply", "United Power Supply", "Universal Power System"], answer: 0, explanation: "UPS provides battery backup during power cuts." },
-            { id: 81, question: "The extension .jpg refers to?", options: ["Audio File", "Video File", "Image File", "Text File"], answer: 2, explanation: "JPEG/JPG is a common image format." },
-            { id: 82, question: "Which of these is the 'Modifier' key?", options: ["Shift", "A", "Enter", "Spacebar"], answer: 0, explanation: "Shift, Ctrl, and Alt are modifier keys." },
-            { id: 83, question: "Data organized in a meaningful way is called?", options: ["Information", "Code", "Query", "Software"], answer: 0, explanation: "Processed data is known as Information." },
-            { id: 84, question: "What is the shortcut to print a document?", options: ["Ctrl + P", "Ctrl + O", "Ctrl + I", "Alt + P"], answer: 0, explanation: "Ctrl + P opens the Print dialog." },
-            { id: 85, question: "In Excel, a formula always starts with?", options: ["+", "-", "=", "%"], answer: 2, explanation: "All Excel formulas must begin with an equals sign (=)." },
-            { id: 86, question: "Which topology uses a central hub?", options: ["Bus", "Ring", "Star", "Mesh"], answer: 2, explanation: "In Star topology, all nodes connect to a central hub/switch." },
-            { id: 87, question: "A collection of 8 bits is called a?", options: ["Bit", "Byte", "Record", "Nibble"], answer: 1, explanation: "8 bits = 1 Byte." },
-            { id: 88, question: "Which company developed Java?", options: ["Microsoft", "Sun Microsystems", "Google", "Apple"], answer: 1, explanation: "Sun Microsystems (later acquired by Oracle) developed Java." },
-            { id: 89, question: "What is a 'Bug'?", options: ["Virus", "Error in a program", "Hardware failure", "Antivirus"], answer: 1, explanation: "A bug is a coding error or fault in a program." },
-            { id: 90, question: "Which of these is cloud storage?", options: ["Hard Drive", "Pen Drive", "Google Drive", "Floppy"], answer: 2, explanation: "Google Drive is a cloud-based storage service." },
-            { id: 91, question: "The standard keyboard layout is known as?", options: ["QWERTY", "AZERTY", "DVORAK", "ABCDE"], answer: 0, explanation: "QWERTY is the standard layout named after the first six letters." },
-            { id: 92, question: "Which shortcut closes the current active window?", options: ["Alt + F4", "Ctrl + F4", "Shift + F4", "Alt + F5"], answer: 0, explanation: "Alt + F4 closes the active application window." },
-            { id: 93, question: "Which one is NOT a search engine?", options: ["Bing", "Yahoo", "Windows", "DuckDuckGo"], answer: 2, explanation: "Windows is an OS, not a search engine." },
-            { id: 94, question: "What does ISP stand for?", options: ["Internet Service Provider", "Internal Service Provider", "Internet Speed Provider", "International Service Provider"], answer: 0, explanation: "Companies that provide internet access (e.g., Airtel, Jio)." },
-            { id: 95, question: "Which tag is used for the largest heading in HTML?", options: ["<h6>", "<h1>", "<head>", "<header>"], answer: 1, explanation: "<h1> defines the most important heading." },
-            { id: 96, question: "Which device is both Input and Output?", options: ["Touchscreen", "Keyboard", "Printer", "Mouse"], answer: 0, explanation: "A touchscreen accepts input (touch) and displays output." },
-            { id: 97, question: "The process of copying files to a CD/DVD is called?", options: ["Burning", "Zipping", "Digitizing", "Ripping"], answer: 0, explanation: "Burning is the term for writing data to optical discs." },
-            { id: 98, question: "Which key opens the Help menu?", options: ["F1", "F2", "F10", "Esc"], answer: 0, explanation: "F1 is the universal shortcut for Help." },
-            { id: 99, question: "What is the full form of SIM?", options: ["Subscriber Identity Module", "System Information Module", "Subscriber Internet Mobile", "System Identity Mobile"], answer: 0, explanation: "Subscriber Identity Module." },
-            { id: 100, question: "Ctrl + Z is used for?", options: ["Undo", "Redo", "Copy", "Paste"], answer: 0, explanation: "Ctrl + Z is the universal Undo shortcut." }
+        // --- MOCK DATABASE (Updated for KVS/DSSSB/CBSE Syllabus) ---
+        // Questions reflect the 'Previous Year Question' style of KVS PGT CS & DSSSB.
+        const QUESTION_DATABASE = [
+            // --- TOPIC: PYTHON (Outputs & Concepts) - High Weightage in KVS ---
+            {
+                id: 1,
+                category: "Python Output",
+                question: "What will be the output of: print('Hello'[-1::-1])?",
+                options: ["Hello", "olleH", "Error", "o"],
+                correctAnswer: 1,
+                explanation: "Slicing syntax is [start:stop:step]. 'Hello'[-1] is 'o'. The step is -1, which reverses the string. So it prints the string in reverse: 'olleH'. This is a common pattern in CBSE/KVS exams."
+            },
+            {
+                id: 2,
+                category: "Python Lists",
+                question: "L = [1, 2, 3]. What is the result of L * 2?",
+                options: ["[2, 4, 6]", "[1, 2, 3, 1, 2, 3]", "Error", "[1, 2, 3, 2]"],
+                correctAnswer: 1,
+                explanation: "In Python, the '*' operator on a list performs replication, not element-wise multiplication. It repeats the list elements. [1, 2, 3] * 2 becomes [1, 2, 3, 1, 2, 3]."
+            },
+            {
+                id: 3,
+                category: "Python Tuples",
+                question: "Which of the following creates a tuple with a single element?",
+                options: ["t = (5)", "t = 5,", "t = (5,)", "Both B and C"],
+                correctAnswer: 3,
+                explanation: "To create a single-element tuple, a trailing comma is mandatory. 't=(5)' is just an integer in parentheses. Both 't=5,' and 't=(5,)' create a tuple of length 1."
+            },
+            {
+                id: 4,
+                category: "Python Functions",
+                question: "What is the default return value of a function in Python that does not return anything explicitly?",
+                options: ["0", "True", "None", "Null"],
+                correctAnswer: 2,
+                explanation: "If a Python function reaches the end of execution without hitting a 'return' statement, it implicitly returns the special object 'None'. Note: Python uses 'None', not 'Null'."
+            },
+             {
+                id: 5,
+                category: "Python Identifiers",
+                question: "Which of the following is NOT a keyword in Python?",
+                options: ["eval", "assert", "nonlocal", "pass"],
+                correctAnswer: 0,
+                explanation: "'eval' is a built-in function in Python, not a keyword. 'assert', 'nonlocal', and 'pass' are reserved keywords. Keywords cannot be used as identifiers."
+            },
+            // --- TOPIC: COMPUTER NETWORKS (Protocols & Topologies) ---
+            {
+                id: 6,
+                category: "Networking",
+                question: "Which topology requires a central controller or hub?",
+                options: ["Mesh", "Star", "Bus", "Ring"],
+                correctAnswer: 1,
+                explanation: "In a Star topology, all nodes are connected to a central device (hub or switch). If the central hub fails, the entire network fails. This is the most common topology in LANs."
+            },
+            {
+                id: 7,
+                category: "Networking Protocols",
+                question: "Identify the protocol used for remote login.",
+                options: ["FTP", "SMTP", "Telnet", "HTTP"],
+                correctAnswer: 2,
+                explanation: "Telnet (Teletype Network) and SSH (Secure Shell) are protocols used for remote login to control a computer over a network. FTP is for files, SMTP for email, HTTP for web."
+            },
+            {
+                id: 8,
+                category: "Network Devices",
+                question: "A device that regenerates the signal to extend the range of a network is called a:",
+                options: ["Gateway", "Router", "Repeater", "Modem"],
+                correctAnswer: 2,
+                explanation: "A Repeater operates at the Physical layer. It receives a signal, regenerates/amplifies it, and retransmits it to extend the transmission distance. A Hub is essentially a multi-port repeater."
+            },
+            {
+                id: 9,
+                category: "MAC Address",
+                question: "What is the length of a MAC address?",
+                options: ["32 bits", "48 bits", "64 bits", "128 bits"],
+                correctAnswer: 1,
+                explanation: "A MAC (Media Access Control) address is a 48-bit unique identifier assigned to a network interface controller (NIC). It is usually represented as 6 pairs of hexadecimal digits."
+            },
+            // --- TOPIC: DBMS & SQL (NCERT Focus) ---
+            {
+                id: 10,
+                category: "SQL Keys",
+                question: "Which constraint ensures that all values in a column are different?",
+                options: ["NOT NULL", "UNIQUE", "DEFAULT", "CHECK"],
+                correctAnswer: 1,
+                explanation: "The UNIQUE constraint ensures that all values in a column are different. Primary Key also enforces uniqueness but can only be used once per table and cannot allow NULLs."
+            },
+            {
+                id: 11,
+                category: "SQL Commands",
+                question: "Which SQL clause is used to filter groups of rows created by the GROUP BY clause?",
+                options: ["WHERE", "ORDER BY", "HAVING", "SELECT"],
+                correctAnswer: 2,
+                explanation: "The 'WHERE' clause filters individual rows BEFORE grouping. The 'HAVING' clause filters groups AFTER the GROUP BY operation has occurred."
+            },
+            {
+                id: 12,
+                category: "SQL DDL/DML",
+                question: "Which of the following is a DDL (Data Definition Language) command?",
+                options: ["SELECT", "INSERT", "UPDATE", "ALTER"],
+                correctAnswer: 3,
+                explanation: "ALTER is a DDL command used to modify the structure of a table. SELECT, INSERT, UPDATE, and DELETE are DML (Data Manipulation Language) commands."
+            },
+            // --- TOPIC: COMPUTER SYSTEM ORGANIZATION (Boolean Logic/Number Systems) ---
+            {
+                id: 13,
+                category: "Boolean Logic",
+                question: "De Morgan's First Theorem states that: (A + B)' = ?",
+                options: ["A' + B'", "A' . B'", "A . B", "A' + B"],
+                correctAnswer: 1,
+                explanation: "De Morgan's First Law states that the complement of a logical sum equals the logical product of the complements: (A + B)' = A' . B'. (NOR is equivalent to Bubbled AND)."
+            },
+            {
+                id: 14,
+                category: "Number Systems",
+                question: "What is the hexadecimal equivalent of decimal 15?",
+                options: ["A", "C", "F", "E"],
+                correctAnswer: 2,
+                explanation: "In Hexadecimal (base-16): 0-9 represent values 0-9, and A=10, B=11, C=12, D=13, E=14, F=15. Thus, 15 is F."
+            },
+             {
+                id: 15,
+                category: "Encoding",
+                question: "What does ASCII stand for?",
+                options: ["American Standard Code for Information Interchange", "American Standard Code for Internet Interchange", "American Scientific Code for Information Interchange", "Asian Standard Code for Information Interchange"],
+                correctAnswer: 0,
+                explanation: "ASCII stands for 'American Standard Code for Information Interchange'. It is a 7-bit character encoding standard."
+            },
+            // --- TOPIC: SOCIETY, LAW & ETHICS ---
+            {
+                id: 16,
+                category: "Cyber Ethics",
+                question: "The act of copying someone else's work and passing it off as one's own is called:",
+                options: ["Phishing", "Plagiarism", "Spamming", "Hacking"],
+                correctAnswer: 1,
+                explanation: "Plagiarism is the unethical act of using someone else's ideas, work, or writings without proper attribution and presenting them as your own."
+            },
+            {
+                id: 17,
+                category: "Cyber Law",
+                question: "Which Act in India primarily deals with cybercrime and electronic commerce?",
+                options: ["IT Act 2000", "IPC 1860", "Copyright Act 1957", "Consumer Protection Act"],
+                correctAnswer: 0,
+                explanation: "The Information Technology Act, 2000 (IT Act 2000) is the primary law in India dealing with cybercrime and electronic commerce."
+            },
+            // --- MIXED BAG (Data Structures, OS) ---
+            {
+                id: 18,
+                category: "Data Structures",
+                question: "Which data structure is used in recursion management?",
+                options: ["Queue", "Linked List", "Stack", "Tree"],
+                correctAnswer: 2,
+                explanation: "Recursion uses a Stack (the Call Stack) to keep track of function calls. When a function calls itself, the current state is pushed onto the stack."
+            },
+            {
+                id: 19,
+                category: "Python Libraries",
+                question: "Which Python library is primarily used for Data Visualization?",
+                options: ["Pandas", "NumPy", "Matplotlib", "Django"],
+                correctAnswer: 2,
+                explanation: "Matplotlib (specifically the pyplot module) is the most common library for creating static, animated, and interactive visualizations in Python. Pandas is for analysis, Django for web."
+            },
+            {
+                id: 20,
+                category: "File Handling",
+                question: "Which mode is used to open a file for reading in binary format?",
+                options: ["'r'", "'rb'", "'w'", "'wb'"],
+                correctAnswer: 1,
+                explanation: "'r' is for reading text. 'rb' stands for 'Read Binary'. It is essential when handling non-text files like images or when precise byte handling is needed."
+            }
         ];
 
         // --- COMPONENTS ---
 
-        // Simple Heart Icon
-        const HeartIcon = ({ size = 24, fill = "currentColor", className = "" }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-            </svg>
-        );
-
-        // Advanced Cat Icon with Sad Mode
-        const CatIcon = ({ mood = 'neutral', holding = null }) => (
-            <svg viewBox="0 0 200 200" className="w-40 h-40 md:w-48 md:h-48 mx-auto drop-shadow-md transition-transform duration-300">
-                {/* Ears */}
-                <path d="M40 60 L60 10 L90 50 Z" fill="#D4A373" stroke="#AC8257" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M160 60 L140 10 L110 50 Z" fill="#D4A373" stroke="#AC8257" strokeWidth="2" strokeLinejoin="round" />
-                
-                {/* Head */}
-                <ellipse cx="100" cy="110" rx="70" ry="60" fill="#E9C496" stroke="#D4A373" strokeWidth="2" />
-                
-                {/* Eyes */}
-                {mood === 'happy' || mood === 'excited' ? (
-                    <>
-                        <path d="M70 100 Q80 90 90 100" fill="none" stroke="#4A3B2A" strokeWidth="4" strokeLinecap="round" />
-                        <path d="M110 100 Q120 90 130 100" fill="none" stroke="#4A3B2A" strokeWidth="4" strokeLinecap="round" />
-                    </>
-                ) : mood === 'sad' ? (
-                    <>
-                         {/* Sad/Teary Eyes */}
-                        <circle cx="80" cy="100" r="5" fill="#4A3B2A" />
-                        <circle cx="120" cy="100" r="5" fill="#4A3B2A" />
-                        {/* Tears */}
-                        <path d="M80 105 Q75 115 80 125" stroke="#3B82F6" strokeWidth="2" fill="#93C5FD" opacity="0.8" />
-                        <path d="M120 105 Q125 115 120 125" stroke="#3B82F6" strokeWidth="2" fill="#93C5FD" opacity="0.8" />
-                        {/* Eyebrows slanted sad */}
-                        <path d="M65 90 L85 85" stroke="#4A3B2A" strokeWidth="2" />
-                        <path d="M135 90 L115 85" stroke="#4A3B2A" strokeWidth="2" />
-                    </>
-                ) : (
-                    <>
-                        <circle cx="80" cy="100" r="5" fill="#4A3B2A" />
-                        <circle cx="120" cy="100" r="5" fill="#4A3B2A" />
-                    </>
-                )}
-                
-                {/* Nose */}
-                <path d="M95 115 L105 115 L100 122 Z" fill="#FF8FAB" />
-                
-                {/* Mouth */}
-                {mood === 'sad' ? (
-                     <path d="M90 135 Q100 125 110 135" fill="none" stroke="#4A3B2A" strokeWidth="2" strokeLinecap="round" />
-                ) : (
-                    <>
-                        <path d="M60 115 L30 110" stroke="#CD9777" strokeWidth="2" opacity="0.6" />
-                        <path d="M60 122 L30 125" stroke="#CD9777" strokeWidth="2" opacity="0.6" />
-                        <path d="M140 115 L170 110" stroke="#CD9777" strokeWidth="2" opacity="0.6" />
-                        <path d="M140 122 L170 125" stroke="#CD9777" strokeWidth="2" opacity="0.6" />
-                    </>
-                )}
-
-                {/* Hands/Paws (Visible when holding something) */}
-                {holding && (
-                    <>
-                        <circle cx="70" cy="150" r="12" fill="#D4A373" stroke="#AC8257" strokeWidth="2" />
-                        <circle cx="130" cy="150" r="12" fill="#D4A373" stroke="#AC8257" strokeWidth="2" />
-                    </>
-                )}
-
-                {/* Items being held */}
-                {holding === 'rose' && (
-                    <g transform="translate(100, 140)">
-                         <g className="animate-sway origin-bottom">
-                            <path d="M0 0 Q2 -20 0 -40" stroke="#166534" strokeWidth="3" fill="none" />
-                            <path d="M0 -20 C5 -22 12 -20 15 -15 C12 -12 5 -15 0 -18" fill="#15803d" />
-                            <path d="M0 -25 C-5 -27 -12 -25 -15 -20 C-12 -17 -5 -20 0 -23" fill="#15803d" />
-                            <path d="M-8 -38 C-8 -30 8 -30 8 -38 L0 -40 Z" fill="#9F1239" /> 
-                            <path d="M-10 -40 C-12 -55 12 -55 10 -40 C5 -35 -5 -35 -10 -40" fill="#E11D48" />
-                            <path d="M-6 -45 C-6 -50 6 -50 6 -45 C3 -42 -3 -42 -6 -45" fill="#FB7185" />
-                        </g>
-                    </g>
-                )}
-
-                {holding === 'chocolate' && (
-                    <g transform="translate(70, 120)">
-                        <rect x="0" y="0" width="60" height="40" rx="4" fill="#5D4037" stroke="#3E2723" strokeWidth="2" />
-                        <rect x="5" y="5" width="22" height="12" rx="1" fill="#795548" />
-                        <rect x="33" y="5" width="22" height="12" rx="1" fill="#795548" />
-                        <rect x="5" y="23" width="22" height="12" rx="1" fill="#795548" />
-                        <rect x="33" y="23" width="22" height="12" rx="1" fill="#795548" />
-                    </g>
-                )}
-
-                {/* Floating Heart if not holding anything specific and not sad */}
-                {!holding && mood !== 'sad' && (
-                    <g className="animate-bounce">
-                        <path d="M150 40 Q165 25 180 40 T200 60 Q180 90 150 110" fill="#FF4D6D" transform="scale(0.6) translate(80, -40)" />
-                    </g>
-                )}
-            </svg>
-        );
-
-        function Quiz({ onBack }) {
-            const [questions, setQuestions] = useState([]);
-            const [currentQIndex, setCurrentQIndex] = useState(0);
-            const [selected, setSelected] = useState(null);
-            const [showResult, setShowResult] = useState(false);
-            const [score, setScore] = useState(0);
-            const [showConfetti, setShowConfetti] = useState(false);
-
-            // Shuffle questions on initialization
-            useEffect(() => {
-                const shuffled = [...QUESTIONS_DB];
-                // Fisher-Yates Shuffle Algorithm
-                for (let i = shuffled.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                }
-                setQuestions(shuffled);
-            }, []);
-
-            if (questions.length === 0) return <div className="p-10 text-center">Loading Quiz...</div>;
-
-            const q = questions[currentQIndex];
-            const isCorrect = selected === q.answer;
-
-            const handleOptionClick = (index) => {
-                if (showResult) return;
-                setSelected(index);
-                setShowResult(true);
-                if (index === q.answer) {
-                    setScore(s => s + 1);
-                    setShowConfetti(true);
-                    setTimeout(() => setShowConfetti(false), 2000); 
-                }
-            };
-
-            const nextQuestion = () => {
-                setSelected(null);
-                setShowResult(false);
-                setShowConfetti(false);
-                if (currentQIndex < questions.length - 1) {
-                    setCurrentQIndex(c => c + 1);
-                } else {
-                    alert(`Quiz Complete! Score: ${score}/${questions.length}`);
-                    onBack();
+        // 1. Animated Cat Component
+        const CatMascot = ({ mood }) => {
+            // Moods: 'neutral', 'happy', 'sad', 'thinking', 'peeking'
+            
+            const getEyes = () => {
+                if (mood === 'happy') {
+                    return (
+                        <>
+                            <path d="M70 100 Q80 90 90 100" fill="none" stroke="#374151" strokeWidth="4" strokeLinecap="round" />
+                            <path d="M110 100 Q120 90 130 100" fill="none" stroke="#374151" strokeWidth="4" strokeLinecap="round" />
+                        </>
+                    );
+                } else if (mood === 'sad') {
+                    return (
+                        <>
+                             <path d="M70 105 Q80 115 90 105" fill="none" stroke="#374151" strokeWidth="4" strokeLinecap="round" />
+                             <path d="M110 105 Q120 115 130 105" fill="none" stroke="#374151" strokeWidth="4" strokeLinecap="round" />
+                             <path d="M145 50 L130 90" stroke="#3B82F6" strokeWidth="3" opacity="0.6" /> {/* Tear track */}
+                        </>
+                    );
+                } else if (mood === 'thinking') {
+                     return (
+                        <>
+                             <circle cx="80" cy="95" r="5" fill="#374151" />
+                             <circle cx="120" cy="95" r="5" fill="#374151" />
+                             <path d="M160 80 Q180 60 190 80 T210 60" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeDasharray="4 4" />
+                             <text x="215" y="60" fontSize="20">?</text>
+                        </>
+                    );
+                } else { // Neutral / Peeking
+                    return (
+                        <>
+                            <circle cx="80" cy="100" r="6" fill="#374151" />
+                            <circle cx="120" cy="100" r="6" fill="#374151" />
+                             {/* Shine in eye */}
+                            <circle cx="82" cy="98" r="2" fill="white" />
+                            <circle cx="122" cy="98" r="2" fill="white" />
+                        </>
+                    );
                 }
             };
 
             return (
-                <div className="w-full max-w-2xl mx-auto p-4 flex flex-col h-full">
+                <div className={`w-32 h-32 md:w-40 md:h-40 relative animate-float transition-all duration-300`}>
+                    <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-lg">
+                        {/* Ears */}
+                        <path d="M40 70 L50 20 L90 60 Z" fill="#FDBA74" stroke="#EA580C" strokeWidth="3" strokeLinejoin="round" />
+                        <path d="M160 70 L150 20 L110 60 Z" fill="#FDBA74" stroke="#EA580C" strokeWidth="3" strokeLinejoin="round" />
+                        
+                        {/* Head */}
+                        <ellipse cx="100" cy="120" rx="75" ry="65" fill="#FFEDD5" stroke="#EA580C" strokeWidth="3" />
+                        
+                        {/* Eyes */}
+                        {getEyes()}
+                        
+                        {/* Nose */}
+                        <path d="M95 125 L105 125 L100 132 Z" fill="#F43F5E" />
+                        
+                        {/* Mouth */}
+                        <path d="M100 132 Q90 145 80 135" fill="none" stroke="#374151" strokeWidth="3" strokeLinecap="round" />
+                        <path d="M100 132 Q110 145 120 135" fill="none" stroke="#374151" strokeWidth="3" strokeLinecap="round" />
+
+                        {/* Whiskers */}
+                        <g opacity="0.5">
+                            <line x1="50" y1="120" x2="20" y2="115" stroke="#374151" strokeWidth="2" />
+                            <line x1="50" y1="130" x2="20" y2="130" stroke="#374151" strokeWidth="2" />
+                            <line x1="150" y1="120" x2="180" y2="115" stroke="#374151" strokeWidth="2" />
+                            <line x1="150" y1="130" x2="180" y2="130" stroke="#374151" strokeWidth="2" />
+                        </g>
+
+                        {/* Paws if peeking */}
+                        {mood === 'peeking' && (
+                             <g>
+                                <ellipse cx="60" cy="170" rx="15" ry="10" fill="#fff" stroke="#EA580C" strokeWidth="2" />
+                                <ellipse cx="140" cy="170" rx="15" ry="10" fill="#fff" stroke="#EA580C" strokeWidth="2" />
+                             </g>
+                        )}
+                    </svg>
+                </div>
+            );
+        };
+
+        // 2. Flashcard Component
+        const FlashcardMode = ({ goBack }) => {
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [isFlipped, setIsFlipped] = useState(false);
+            
+            // Randomize cards once on mount
+            const cards = useMemo(() => [...QUESTION_DATABASE].sort(() => 0.5 - Math.random()), []);
+
+            const handleNext = (e) => {
+                e.stopPropagation();
+                setIsFlipped(false);
+                setTimeout(() => {
+                    setCurrentIndex((prev) => (prev + 1) % cards.length);
+                }, 150);
+            };
+
+            const handlePrev = (e) => {
+                e.stopPropagation();
+                setIsFlipped(false);
+                setTimeout(() => {
+                    setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length);
+                }, 150);
+            };
+
+            const currentCard = cards[currentIndex];
+
+            return (
+                <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4">
+                    <div className="w-full flex justify-between items-center mb-6">
+                        <button onClick={goBack} className="flex items-center text-indigo-600 font-bold hover:underline">
+                            ← Back to Menu
+                        </button>
+                        <h2 className="text-2xl font-bold text-gray-800">Flashcards ({currentIndex + 1}/{cards.length})</h2>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-6 w-full">
+                        <CatMascot mood={isFlipped ? "happy" : "peeking"} />
+
+                        <div className="relative w-full max-w-lg h-80 perspective-1000 cursor-pointer group" onClick={() => setIsFlipped(!isFlipped)}>
+                            <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d shadow-xl rounded-2xl ${isFlipped ? 'rotate-y-180' : ''}`}>
+                                
+                                {/* FRONT */}
+                                <div className="absolute w-full h-full bg-white rounded-2xl p-8 flex flex-col items-center justify-center backface-hidden border-2 border-indigo-100">
+                                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4">Question</span>
+                                    <h3 className="text-xl md:text-2xl font-semibold text-center text-gray-800">
+                                        {currentCard.question}
+                                    </h3>
+                                    <p className="absolute bottom-4 text-sm text-gray-400">Click to flip</p>
+                                </div>
+
+                                {/* BACK */}
+                                <div className="absolute w-full h-full bg-indigo-600 rounded-2xl p-8 flex flex-col items-center justify-center backface-hidden rotate-y-180 text-white">
+                                    <span className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-2">Answer</span>
+                                    <h3 className="text-xl font-bold text-center mb-4 text-white">
+                                        {currentCard.options[currentCard.correctAnswer]}
+                                    </h3>
+                                    <div className="bg-white/10 rounded-lg p-4 w-full text-sm leading-relaxed overflow-y-auto custom-scroll">
+                                        {currentCard.explanation}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4 mt-4">
+                            <button onClick={handlePrev} className="px-6 py-2 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50 font-semibold">Prev</button>
+                            <button onClick={handleNext} className="px-6 py-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 font-semibold">Next Card</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 3. Quiz Component
+        const QuizMode = ({ goBack }) => {
+            const [questions, setQuestions] = useState([]);
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [score, setScore] = useState(0);
+            const [selectedOption, setSelectedOption] = useState(null);
+            const [showExplanation, setShowExplanation] = useState(false);
+            const [isQuizFinished, setIsQuizFinished] = useState(false);
+            const [catMood, setCatMood] = useState('neutral');
+
+            // Initialize Quiz
+            useEffect(() => {
+                // 1. Shuffle full database
+                const shuffled = [...QUESTION_DATABASE].sort(() => 0.5 - Math.random());
+                // 2. Select 20 questions for the quiz
+                const selected = shuffled.slice(0, 20);
+                setQuestions(selected);
+            }, []);
+
+            const handleOptionClick = (index) => {
+                if (selectedOption !== null) return; // Prevent changing answer
+
+                setSelectedOption(index);
+                setShowExplanation(true);
+                
+                const currentQ = questions[currentIndex];
+                if (index === currentQ.correctAnswer) {
+                    setScore(prev => prev + 1);
+                    setCatMood('happy');
+                } else {
+                    setCatMood('sad');
+                }
+            };
+
+            const handleNext = () => {
+                if (currentIndex < questions.length - 1) {
+                    setCurrentIndex(prev => prev + 1);
+                    setSelectedOption(null);
+                    setShowExplanation(false);
+                    setCatMood('thinking');
+                } else {
+                    setIsQuizFinished(true);
+                    setCatMood('happy');
+                }
+            };
+
+            if (questions.length === 0) return <div>Loading...</div>;
+
+            if (isQuizFinished) {
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-2xl mx-auto p-6 text-center">
+                        <CatMascot mood="happy" />
+                        <h2 className="text-4xl font-bold text-gray-800 mt-6 mb-2">Quiz Completed!</h2>
+                        <p className="text-xl text-gray-600 mb-8">You scored <span className="text-indigo-600 font-bold">{score}</span> out of {questions.length}</p>
+                        
+                        <div className="w-full bg-gray-200 rounded-full h-4 mb-8">
+                            <div 
+                                className="bg-indigo-600 h-4 rounded-full transition-all duration-1000" 
+                                style={{ width: `${(score / questions.length) * 100}%` }}
+                            ></div>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <button onClick={goBack} className="px-8 py-3 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-bold hover:bg-indigo-50 transition-colors">
+                                Menu
+                            </button>
+                            <button onClick={() => window.location.reload()} className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg transition-transform hover:-translate-y-1">
+                                Retake Quiz
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            const currentQ = questions[currentIndex];
+
+            return (
+                <div className="max-w-3xl mx-auto p-4 w-full">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
-                        <button onClick={onBack} className="text-gray-500 hover:text-[#E11D48] flex items-center gap-1 font-bold">
-                             ← Back
+                         <button onClick={goBack} className="text-sm font-bold text-gray-500 hover:text-indigo-600">
+                            ✕ Exit
                         </button>
-                        <div className="text-[#E11D48] font-bold text-lg bg-rose-100 px-4 py-1 rounded-full">
+                        <div className="bg-white px-4 py-1 rounded-full shadow-sm border border-gray-200 font-bold text-indigo-600">
+                            Q {currentIndex + 1} / {questions.length}
+                        </div>
+                        <div className="font-bold text-gray-700">
                             Score: {score}
                         </div>
                     </div>
 
-                    {/* Progress Bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
-                        <div className="bg-[#E11D48] h-2.5 rounded-full transition-all duration-300" style={{ width: `${((currentQIndex + 1) / questions.length) * 100}%` }}></div>
-                    </div>
+                    <div className="flex flex-col md:flex-row gap-6 items-start">
+                        {/* Left: Mascot */}
+                        <div className="hidden md:flex flex-col items-center w-48 shrink-0">
+                            <CatMascot mood={catMood} />
+                            <div className="mt-4 text-center text-sm text-gray-500 font-medium bg-white p-2 rounded-lg shadow-sm w-full">
+                                {catMood === 'neutral' || catMood === 'thinking' ? "Good Luck!" : 
+                                 catMood === 'happy' ? "Purr-fect!" : "Oh no..."}
+                            </div>
+                        </div>
 
-                    {/* Question Card */}
-                    <div className="bg-white/90 backdrop-blur rounded-2xl p-6 shadow-xl border border-rose-100 flex-1 relative overflow-hidden">
-                        
-                        {/* Confetti Animation for Quiz */}
-                        {showConfetti && (
-                             <div className="absolute inset-0 pointer-events-none z-10">
-                                {[...Array(30)].map((_, i) => (
-                                    <div key={i} className="absolute animate-float" style={{
-                                        left: `${Math.random() * 100}%`,
-                                        top: '100%',
-                                        color: ['#ff0000', '#00ff00', '#0000ff', '#ffff00'][Math.floor(Math.random() * 4)],
-                                        animationDuration: `${1 + Math.random()}s`
-                                    }}>
-                                        <div className="w-2 h-2 rounded-full bg-current"></div>
+                        {/* Right: Question Card */}
+                        <div className="flex-1 w-full">
+                            <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8 border border-gray-100">
+                                <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full mb-4">
+                                    {currentQ.category}
+                                </span>
+                                <h3 className="text-xl font-bold text-gray-800 mb-6 leading-relaxed">
+                                    {currentQ.question}
+                                </h3>
+
+                                <div className="space-y-3">
+                                    {currentQ.options.map((option, idx) => {
+                                        let btnClass = "w-full text-left p-4 rounded-xl border-2 transition-all duration-200 font-medium ";
+                                        
+                                        if (selectedOption === null) {
+                                            btnClass += "border-gray-100 hover:border-indigo-300 hover:bg-indigo-50 bg-gray-50 text-gray-700";
+                                        } else {
+                                            if (idx === currentQ.correctAnswer) {
+                                                btnClass += "border-green-500 bg-green-50 text-green-700"; // Correct
+                                            } else if (idx === selectedOption) {
+                                                btnClass += "border-red-500 bg-red-50 text-red-700"; // Wrong selection
+                                            } else {
+                                                btnClass += "border-gray-100 bg-gray-50 text-gray-400 opacity-50"; // Others
+                                            }
+                                        }
+
+                                        return (
+                                            <button 
+                                                key={idx} 
+                                                onClick={() => handleOptionClick(idx)}
+                                                disabled={selectedOption !== null}
+                                                className={btnClass}
+                                            >
+                                                <span className="inline-block w-6 font-bold opacity-60 mr-2">{String.fromCharCode(65 + idx)}.</span>
+                                                {option}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Explanation Area */}
+                            {showExplanation && (
+                                <div className="mt-6 animate-float" style={{ animationDuration: '0.5s', animationIterationCount: 1 }}>
+                                    <div className="bg-indigo-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                                        
+                                        <div className="flex items-start gap-4 relative z-10">
+                                            <div className="text-3xl">
+                                                {selectedOption === currentQ.correctAnswer ? '🎉' : '💡'}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-lg mb-2">
+                                                    {selectedOption === currentQ.correctAnswer ? 'Correct!' : 'Explanation:'}
+                                                </h4>
+                                                <p className="text-indigo-100 leading-relaxed text-sm md:text-base">
+                                                    {currentQ.explanation}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-
-                        <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
-                            <span className="text-rose-400 mr-2">Q{currentQIndex + 1}.</span> 
-                            {q.question}
-                        </h2>
-
-                        {/* Options */}
-                        <div className="grid gap-3">
-                            {q.options.map((opt, idx) => {
-                                let btnClass = "p-4 rounded-xl text-left border-2 transition-all duration-200 font-medium ";
-                                if (!showResult) {
-                                    btnClass += "border-gray-100 hover:border-rose-300 hover:bg-rose-50 text-gray-700";
-                                } else {
-                                    if (idx === q.answer) {
-                                        btnClass += "border-green-500 bg-green-50 text-green-700 shadow-[0_0_10px_rgba(34,197,94,0.3)] transform scale-[1.02]";
-                                    } else if (idx === selected) {
-                                        btnClass += "border-red-400 bg-red-50 text-red-600";
-                                    } else {
-                                        btnClass += "border-gray-100 text-gray-400 opacity-60";
-                                    }
-                                }
-
-                                return (
+                                    
                                     <button 
-                                        key={idx}
-                                        onClick={() => handleOptionClick(idx)}
-                                        disabled={showResult}
-                                        className={btnClass}
+                                        onClick={handleNext}
+                                        className="mt-6 w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-indigo-700 transform transition-transform active:scale-95 flex items-center justify-center gap-2"
                                     >
-                                        <span className="inline-block w-6 h-6 rounded-full border border-current mr-3 text-center text-xs leading-[22px] opacity-70">
-                                            {['A','B','C','D'][idx]}
-                                        </span>
-                                        {opt}
+                                        {currentIndex === questions.length - 1 ? 'Finish Quiz' : 'Next Question →'}
                                     </button>
-                                )
-                            })}
+                                </div>
+                            )}
                         </div>
                     </div>
-
-                    {/* Result Overlay / Bottom Sheet */}
-                    {showResult && (
-                        <div className="mt-4 animate-in slide-in-from-bottom duration-300">
-                            <div className={`p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center ${isCorrect ? 'bg-green-100 border border-green-200' : 'bg-red-100 border border-red-200'}`}>
-                                <div className="shrink-0">
-                                    <CatIcon mood={isCorrect ? 'happy' : 'sad'} />
-                                </div>
-                                <div className="text-center md:text-left flex-1">
-                                    <h3 className={`text-lg font-bold mb-1 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                                        {isCorrect ? 'Correct! 🎉' : 'Oops! 😿'}
-                                    </h3>
-                                    <p className="text-sm text-gray-700 mb-3 leading-relaxed">
-                                        <span className="font-semibold">Explanation:</span> {q.explanation}
-                                    </p>
-                                    <button 
-                                        onClick={nextQuestion}
-                                        className="bg-gray-800 text-white px-6 py-2 rounded-full font-bold shadow-lg hover:scale-105 transition-transform text-sm"
-                                    >
-                                        {currentQIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
             );
-        }
+        };
 
-        function App() {
-            const [view, setView] = useState('home'); // 'home' or 'quiz'
-            const [accepted, setAccepted] = useState(false);
-            const [noPosition, setNoPosition] = useState({ x: 0, y: 0 });
-            const [hasMoved, setHasMoved] = useState(false);
-            const [interaction, setInteraction] = useState(null); 
-            const noBtnRef = useRef(null);
-            const containerRef = useRef(null);
-
-            useEffect(() => {
-                if (interaction) {
-                    const timer = setTimeout(() => {
-                        setInteraction(null);
-                    }, 3000); 
-                    return () => clearTimeout(timer);
-                }
-            }, [interaction]);
-
-            const handleNoInteraction = (e) => {
-                if (accepted) return;
-                
-                if (e.type === 'touchstart') {
-                   // e.preventDefault();
-                }
-
-                if (!containerRef.current || !noBtnRef.current) return;
-
-                const containerRect = containerRef.current.getBoundingClientRect();
-                const btnRect = noBtnRef.current.getBoundingClientRect();
-
-                const padding = 20;
-                const maxX = containerRect.width - btnRect.width - padding;
-                const maxY = containerRect.height - btnRect.height - padding;
-
-                const randomX = Math.max(0, Math.random() * maxX);
-                const randomY = Math.max(0, Math.random() * maxY);
-
-                setNoPosition({ x: randomX, y: randomY });
-                setHasMoved(true);
-            };
-
-            const celebrate = () => {
-                setAccepted(true);
-            };
-
-            const resetGame = () => {
-                setAccepted(false);
-                setHasMoved(false);
-                setNoPosition({ x: 0, y: 0 });
-                setInteraction(null);
-            };
-
-            if (view === 'quiz') {
-                return (
-                    <div className="min-h-screen bg-[#FDF2F8] flex flex-col items-center">
-                         <Quiz onBack={() => setView('home')} />
+        // 4. Main Menu Component
+        const MainMenu = ({ onStartQuiz, onStartFlashcards }) => {
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4">
+                    <div className="text-center mb-10">
+                        <CatMascot mood="happy" />
+                        <h1 className="text-4xl md:text-6xl font-black text-gray-800 mt-6 tracking-tight">
+                            CS Prep <span className="text-indigo-600">Master</span>
+                        </h1>
+                        <p className="text-gray-500 mt-4 text-lg max-w-md mx-auto">
+                            Master Computer Science for KVS, CBSE & Govt Teaching Exams with our interactive cat-guided quizzes.
+                        </p>
                     </div>
-                )
-            }
+
+                    <div className="grid md:grid-cols-2 gap-6 w-full max-w-2xl">
+                        <button 
+                            onClick={onStartQuiz}
+                            className="group relative bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-indigo-500 text-left overflow-hidden"
+                        >
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" /></svg>
+                            </div>
+                            <span className="inline-block p-3 bg-indigo-100 text-indigo-600 rounded-xl mb-4">
+                                📝 25 Marks
+                            </span>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-2">Take a Quiz</h3>
+                            <p className="text-gray-500">Practice with random questions from our database. Perfect for exam simulation.</p>
+                        </button>
+
+                        <button 
+                            onClick={onStartFlashcards}
+                            className="group relative bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-orange-500 text-left overflow-hidden"
+                        >
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                            </div>
+                            <span className="inline-block p-3 bg-orange-100 text-orange-600 rounded-xl mb-4">
+                                🧠 Study Mode
+                            </span>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-2">Flashcards</h3>
+                            <p className="text-gray-500">Flip through topics to memorize concepts, definitions, and syntax.</p>
+                        </button>
+                    </div>
+                    
+                    <footer className="mt-12 text-gray-400 text-sm">
+                        Database contains high-yield questions from last 5 years.
+                    </footer>
+                </div>
+            );
+        };
+
+        // 5. App Orchestrator
+        const App = () => {
+            const [view, setView] = useState('menu'); // 'menu', 'quiz', 'flashcards'
 
             return (
-                <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative selection:bg-rose-200">
-                    
-                    {/* Interaction Modal Overlay */}
-                    {interaction && (
-                        <div 
-                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
-                            onClick={() => setInteraction(null)}
-                        >
-                            <div className="bg-white rounded-3xl p-8 shadow-2xl animate-in zoom-in duration-300 transform scale-110 flex flex-col items-center max-w-sm mx-4 text-center">
-                                {interaction === 'kiss' && (
-                                    <>
-                                        <span className="text-9xl animate-bounce drop-shadow-lg mb-4">😘</span>
-                                        <p className="text-xl font-bold text-rose-500">Mwaaaaaah!</p>
-                                        <p className="text-lg text-gray-500 mt-2 font-medium italic">"Ok, take thish one. take take"</p>
-                                    </>
-                                )}
-                                {interaction === 'rose' && (
-                                    <>
-                                        <CatIcon mood="happy" holding="rose" />
-                                        <p className="mt-4 text-xl font-bold text-rose-500">For you! 🌹</p>
-                                        <p className="text-lg text-gray-500 mt-2 font-medium italic">"Ok, take thish one. take take"</p>
-                                    </>
-                                )}
-                                {interaction === 'chocolate' && (
-                                    <>
-                                        <CatIcon mood="excited" holding="chocolate" />
-                                        <p className="mt-4 text-xl font-bold text-amber-700">Sweet treat! 🍫</p>
-                                        <p className="text-lg text-gray-500 mt-2 font-medium italic">"Ok, take thish one. take take"</p>
-                                    </>
-                                )}
-                            </div>
+                <div className="min-h-screen bg-gradient-to-br from-green-50 via-indigo-50 to-blue-50">
+                    {view === 'menu' && (
+                        <MainMenu 
+                            onStartQuiz={() => setView('quiz')} 
+                            onStartFlashcards={() => setView('flashcards')} 
+                        />
+                    )}
+                    {view === 'quiz' && (
+                        <div className="min-h-screen flex items-center">
+                            <QuizMode goBack={() => setView('menu')} />
                         </div>
                     )}
-
-                    {/* Decorative Background Elements */}
-                    <div className="absolute top-10 left-10 text-rose-200 animate-pulse">
-                        <HeartIcon size={48} />
-                    </div>
-                    <div className="absolute bottom-10 right-10 text-rose-200 animate-pulse delay-700">
-                        <HeartIcon size={64} />
-                    </div>
-                    <div className="absolute top-1/4 right-1/4 text-rose-100 transform rotate-12">
-                        <HeartIcon size={32} />
-                    </div>
-
-                    {/* Quiz Button (Top Right) */}
-                    <button 
-                        onClick={() => setView('quiz')}
-                        className="absolute top-4 right-4 z-40 bg-indigo-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-indigo-700 transition-transform hover:scale-105 font-bold text-sm flex items-center gap-2"
-                    >
-                        <span>💻</span> Take Quiz
-                    </button>
-
-                    <div 
-                        ref={containerRef}
-                        className="bg-white/80 backdrop-blur-sm shadow-[0_20px_50px_rgba(255,182,193,0.4)] rounded-3xl p-8 md:p-12 max-w-lg w-full text-center border border-white/50 relative z-10 transition-all duration-500 ease-out"
-                        style={{ minHeight: '400px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-                    >
-                        {!accepted ? (
-                            <div className="flex flex-col items-center">
-                                <div className="mb-6">
-                                    <CatIcon mood="neutral" />
-                                </div>
-
-                                <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 font-sans tracking-tight">
-                                    Arpita (urf Guddan)<br />Will you be my valentine?
-                                </h1>
-
-                                <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full h-24">
-                                    {/* YES Button */}
-                                    <button
-                                        onClick={celebrate}
-                                        className="group relative px-8 py-3 bg-[#E11D48] text-white text-xl font-bold rounded-full shadow-lg transform transition-all duration-200 hover:scale-110 active:scale-95 overflow-hidden z-20"
-                                    >
-                                        <span className="relative z-10 flex items-center gap-2">
-                                            Yes <HeartIcon size={20} fill="currentColor" className="animate-pulse" />
-                                        </span>
-                                        
-                                        {/* Shimmer Effect */}
-                                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] group-hover:animate-shimmer skew-x-[-20deg]"></div>
-                                        
-                                        {/* Glow Effect */}
-                                        <div className="absolute inset-0 rounded-full ring-4 ring-rose-400/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                    </button>
-
-                                    {/* NO Button */}
-                                    <button
-                                        ref={noBtnRef}
-                                        onMouseEnter={handleNoInteraction}
-                                        onTouchStart={handleNoInteraction} 
-                                        onClick={handleNoInteraction} // Fallback if they manage to click it
-                                        style={
-                                            hasMoved
-                                                ? {
-                                                        position: 'absolute',
-                                                        left: `${noPosition.x}px`,
-                                                        top: `${noPosition.y}px`,
-                                                        transition: 'all 0.2s ease-in-out',
-                                                        zIndex: 50
-                                                    }
-                                                : { position: 'relative', zIndex: 10, transition: 'all 0.2s ease-in-out' }
-                                        }
-                                        className="px-6 py-2 bg-gray-200 text-gray-500 text-sm font-medium rounded-full hover:bg-gray-300 transition-colors cursor-pointer shadow-sm min-w-[80px]"
-                                    >
-                                        No
-                                    </button>
-                                </div>
-
-                                <div className="mt-12 text-gray-400 text-xs font-medium flex items-center justify-center gap-1 opacity-60">
-                                    "No" seems a bit shy <span role="img" aria-label="devil">😈</span>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="animate-in fade-in zoom-in duration-700 flex flex-col items-center">
-                                <div onClick={resetGame} className="cursor-pointer hover:scale-110 transition-transform duration-200" title="Click to restart">
-                                    <CatIcon mood="happy" />
-                                </div>
-                                
-                                <h1 className="text-4xl md:text-5xl font-extrabold text-[#E11D48] mt-6 mb-4 drop-shadow-sm">
-                                    YAAAY! 🎉
-                                </h1>
-                                
-                                <p className="text-lg text-gray-600 mb-8">
-                                    I knew you'd say yes, Arpita! ❤️
-                                </p>
-
-                                <div className="flex justify-center gap-4">
-                                    <button 
-                                        onClick={() => setInteraction('kiss')} 
-                                        className="text-4xl hover:scale-125 transition-transform duration-200 cursor-pointer animate-bounce delay-100"
-                                        title="Send a kiss"
-                                    >
-                                        🥰
-                                    </button>
-                                    <button 
-                                        onClick={() => setInteraction('rose')} 
-                                        className="text-4xl hover:scale-125 transition-transform duration-200 cursor-pointer animate-bounce delay-200"
-                                        title="Get a rose"
-                                    >
-                                        🌹
-                                    </button>
-                                    <button 
-                                        onClick={() => setInteraction('chocolate')} 
-                                        className="text-4xl hover:scale-125 transition-transform duration-200 cursor-pointer animate-bounce delay-300"
-                                        title="Get chocolate"
-                                    >
-                                        🍫
-                                    </button>
-                                </div>
-                                
-                                {/* Confetti Particles */}
-                                <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-                                    {[...Array(20)].map((_, i) => (
-                                        <div 
-                                            key={i}
-                                            className="absolute animate-float"
-                                            style={{
-                                                left: `${Math.random() * 100}%`,
-                                                top: `110%`,
-                                                animationDelay: `${Math.random() * 2}s`,
-                                                animationDuration: `${3 + Math.random() * 2}s`
-                                            }}
-                                        >
-                                            <HeartIcon size={10 + Math.random() * 20} fill="#E11D48" className="text-[#E11D48] opacity-60" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    {view === 'flashcards' && (
+                        <div className="min-h-screen flex items-center">
+                            <FlashcardMode goBack={() => setView('menu')} />
+                        </div>
+                    )}
                 </div>
             );
-        }
+        };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
