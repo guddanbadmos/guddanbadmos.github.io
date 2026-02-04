@@ -649,9 +649,9 @@
 
                     <div className="flex flex-col md:flex-row gap-6 items-start">
                         {/* Left: Mascot */}
-                        <div className="hidden md:flex flex-col items-center w-48 shrink-0">
+                        <div className="flex flex-col items-center w-full md:w-48 shrink-0 mb-6 md:mb-0">
                             <CatMascot mood={catMood} message={mascotMessage} />
-                            <div className="mt-8 text-center text-sm text-gray-500 font-medium bg-white p-2 rounded-lg shadow-sm w-full">
+                            <div className="mt-4 md:mt-8 text-center text-sm text-gray-500 font-medium bg-white p-2 rounded-lg shadow-sm w-full max-w-[200px] md:max-w-full">
                                 {catMood === 'neutral' || catMood === 'thinking' ? "Good Luck!" : 
                                  catMood === 'dancing' ? "Keep going!" : "Try again!"}
                             </div>
@@ -738,6 +738,7 @@
             const [accepted, setAccepted] = useState(false);
             const [noBtnPos, setNoBtnPos] = useState({ top: 'auto', left: 'auto', position: 'static' });
             const [currentPraise, setCurrentPraise] = useState("");
+            const yesBtnRef = useRef(null);
             
             // Generate a random praise only when accepted changes to true
             useEffect(() => {
@@ -748,35 +749,56 @@
             }, [accepted]);
 
             const handleNoHover = () => {
-                const btnWidth = 100; // estimated
-                const btnHeight = 50; // estimated
-                const padding = 20;
+                const btnWidth = 100; // estimated width
+                const btnHeight = 50; // estimated height
+                const padding = 20; // Padding from screen edges
 
-                // Ensure we stay STRICTLY within the window
-                // Max X = width - button width - padding
-                // Max Y = height - button height - padding
-                const maxX = window.innerWidth - btnWidth - padding;
-                const maxY = window.innerHeight - btnHeight - padding;
+                // Get Yes button position to avoid it
+                let yesRect = { top: 0, bottom: 0, left: 0, right: 0 };
+                if (yesBtnRef.current) {
+                    yesRect = yesBtnRef.current.getBoundingClientRect();
+                }
+
+                // Viewport dimensions
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+
+                let safe = false;
+                let randomX, randomY;
+                let attempts = 0;
+
+                // Try 20 times to find a safe spot that doesn't overlap with the YES button
+                while (!safe && attempts < 20) {
+                    // Generate random position strictly within screen bounds
+                    randomX = padding + Math.random() * (vw - btnWidth - padding * 2);
+                    randomY = padding + Math.random() * (vh - btnHeight - padding * 2);
+
+                    // Collision detection with Yes button (add 50px buffer)
+                    const buffer = 50;
+                    const overlap = !(
+                        randomX + btnWidth < yesRect.left - buffer ||
+                        randomX > yesRect.right + buffer ||
+                        randomY + btnHeight < yesRect.top - buffer ||
+                        randomY > yesRect.bottom + buffer
+                    );
+
+                    if (!overlap) {
+                        safe = true;
+                    }
+                    attempts++;
+                }
                 
-                // Random position within these bounds
-                let randomX = Math.max(padding, Math.random() * maxX);
-                let randomY = Math.max(padding, Math.random() * maxY);
-                
-                // Extra check to avoid exact center (where YES button usually is)
-                // Center area approx: width/2 +/- 100, height/2 +/- 50
-                const centerX = window.innerWidth / 2;
-                const centerY = window.innerHeight / 2;
-                
-                if (Math.abs(randomX - centerX) < 150 && Math.abs(randomY - centerY) < 100) {
-                    // Too close to center, shift it
-                    randomX = randomX < centerX ? 20 : maxX - 20;
+                // Fallback if trapped (rare): just go to top-right corner
+                if (!safe) {
+                    randomX = vw - btnWidth - padding;
+                    randomY = padding;
                 }
 
                 setNoBtnPos({
                     position: 'fixed',
                     left: `${randomX}px`,
                     top: `${randomY}px`,
-                    transition: 'all 0.2s ease-out',
+                    transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', // Smooth "float" ease
                     zIndex: 50
                 });
             };
@@ -851,6 +873,7 @@
 
                         <div className="flex items-center justify-center gap-8 h-20 relative">
                             <button 
+                                ref={yesBtnRef}
                                 onClick={() => setAccepted(true)}
                                 className="px-10 py-4 bg-red-500 text-white text-xl font-bold rounded-full shadow-lg hover:bg-red-600 hover:scale-110 transition-all duration-300 transform hover:shadow-red-300/50 z-20"
                             >
