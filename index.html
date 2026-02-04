@@ -649,9 +649,9 @@
 
                     <div className="flex flex-col md:flex-row gap-6 items-start">
                         {/* Left: Mascot */}
-                        <div className="flex flex-col items-center w-full md:w-48 shrink-0 mb-6 md:mb-0">
+                        <div className="hidden md:flex flex-col items-center w-48 shrink-0">
                             <CatMascot mood={catMood} message={mascotMessage} />
-                            <div className="mt-4 md:mt-8 text-center text-sm text-gray-500 font-medium bg-white p-2 rounded-lg shadow-sm w-full max-w-[200px] md:max-w-full">
+                            <div className="mt-8 text-center text-sm text-gray-500 font-medium bg-white p-2 rounded-lg shadow-sm w-full">
                                 {catMood === 'neutral' || catMood === 'thinking' ? "Good Luck!" : 
                                  catMood === 'dancing' ? "Keep going!" : "Try again!"}
                             </div>
